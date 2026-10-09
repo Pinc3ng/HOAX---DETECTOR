@@ -1,0 +1,36 @@
+dataset_id = "hoaxnews_ind_temp"
+version = "kornwtp-250"
+status = "temporary"           # "temporary" | "final"
+raw_path = "data/raw/hoaxnews_ind_temp.csv"
+notes = """TEMPORARY dataset used ONLY to test the ML pipeline while BRIN/MAFINDO access is pending.
+250 Indonesian news articles (Pratiwi, Asmara & Rahutomo, ICTS 2017; labels by 3-reviewer vote),
+re-hosted on Hugging Face. Licence is not stated on the card (refers to Mendeley Data,
+DOI 10.17632/p3hfgr5j3m.1). Do not redistribute or draw conclusions from the scores."""
+
+[source]
+type = "huggingface"
+repo = "kornwtp/hoaxnews-ind-classfication"
+
+[columns]            # standard column = source column ("" = not available)
+id = "index"
+title = ""
+content = "texts"
+label = "labels"
+
+[label_map]          # raw label -> 1 (flagged as problematic in the dataset) / 0 (not flagged)
+Hoax = 1
+Valid = 0
+
+[cleaning]           # every removal is counted in the report; nothing is dropped silently
+drop_empty = true
+dedupe_exact = true
+drop_conflicting_duplicates = true
+
+[model]
+seed = 42
+test_size = 0.2
+near_duplicate_threshold = 0.9
+cv_splits = 5
+cv_repeats = 3
+risk_threshold_low = 0.35     # provisional; to be tuned on validation data of the FINAL dataset
+risk_threshold_high = 0.65

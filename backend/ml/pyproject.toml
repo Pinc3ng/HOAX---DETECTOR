@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hoax-ml"
+version = "0.1.0"
+description = "Content-risk baseline (TF-IDF + calibrated LinearSVC) for the Smart News & Information Verifier"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scipy>=1.11",
+    "scikit-learn>=1.5",
+    "joblib>=1.3",
+]
+
+[project.optional-dependencies]
+# Only needed by `python -m hoax_ml.fetch` (one-time download of a public dataset).
+fetch = ["datasets>=3.0"]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hoax_ml*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

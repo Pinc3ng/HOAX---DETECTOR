@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>TurnBackHoax (fixture)</title>
+    <link>https://tbh.test/</link>
+    <description>fixture</description>
+    <item>
+      <title>[SALAH] Bawang putih sembuhkan COVID-19</title>
+      <link>https://turnbackhoax.id/2020/03/12/salah-bawang-putih-sembuhkan-covid-19/?utm_source=rss</link>
+      <description><![CDATA[<p>Pesan berantai menyebut bawang putih dapat menyembuhkan COVID-19. Penjelasan: tidak ada bukti ilmiah.</p>]]></description>
+      <pubDate>Thu, 12 Mar 2020 15:00:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>[HOAKS] Minum air jahe cegah virus corona</title>
+      <link>https://turnbackhoax.id/2020/03/13/hoaks-air-jahe-cegah-corona/</link>
+      <description>Air jahe tidak terbukti mencegah infeksi.</description>
+      <pubDate>Fri, 13 Mar 2020 15:00:00 +0700</pubDate>
+    </item>
+  </channel>
+</rss>

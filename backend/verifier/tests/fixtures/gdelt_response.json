@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "url": "https://www.kompas.com/sehat/read/2026/01/10/bawang-putih-covid",
+      "title": "Benarkah bawang putih bisa sembuhkan COVID-19?",
+      "seendate": "20260110T031500Z",
+      "domain": "kompas.com",
+      "language": "Indonesian",
+      "sourcecountry": "Indonesia"
+    },
+    {
+      "url": "https://turnbackhoax.id/2020/03/12/salah-bawang-putih-sembuhkan-covid-19/",
+      "title": "[SALAH] Bawang putih sembuhkan COVID-19",
+      "seendate": "20200312T080000Z",
+      "domain": "turnbackhoax.id",
+      "language": "Indonesian",
+      "sourcecountry": "Indonesia"
+    },
+    {
+      "url": "",
+      "title": "Item tanpa URL harus dibuang",
+      "seendate": "20260101T000000Z",
+      "domain": "example.com"
+    }
+  ]
+}

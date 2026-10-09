@@ -1,0 +1,306 @@
+{
+  "holdout": {
+    "test": {
+      "n": 51,
+      "threshold": 0.5,
+      "accuracy": 0.7647058823529411,
+      "precision": 1.0,
+      "recall": 0.3684210526315789,
+      "f1_positive": 0.5384615384615384,
+      "macro_f1": 0.6902834008097165,
+      "roc_auc": 0.71875,
+      "pr_auc": 0.7346214691486401,
+      "brier": 0.19178074929327166,
+      "ece": 0.05186699880154534,
+      "confusion_matrix": {
+        "tn": 32,
+        "fp": 0,
+        "fn": 12,
+        "tp": 7
+      },
+      "positive_rate": 0.37254901960784315
+    },
+    "train": {
+      "n": 199,
+      "threshold": 0.5,
+      "accuracy": 0.9849246231155779,
+      "precision": 0.9859154929577465,
+      "recall": 0.9722222222222222,
+      "f1_positive": 0.9790209790209791,
+      "macro_f1": 0.9836281365693131,
+      "roc_auc": 0.9989063867016623,
+      "pr_auc": 0.9982305936073057,
+      "brier": 0.05172561246306276,
+      "ece": 0.18579852735314478,
+      "confusion_matrix": {
+        "tn": 126,
+        "fp": 1,
+        "fn": 2,
+        "tp": 70
+      },
+      "positive_rate": 0.36180904522613067
+    },
+    "majority_baseline_test": {
+      "n": 51,
+      "threshold": 0.5,
+      "accuracy": 0.6274509803921569,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_positive": 0.0,
+      "macro_f1": 0.3855421686746988,
+      "roc_auc": 0.5,
+      "pr_auc": 0.37254901960784315,
+      "brier": 0.23387159464679788,
+      "ece": 0.010739974381712425,
+      "confusion_matrix": {
+        "tn": 32,
+        "fp": 0,
+        "fn": 19,
+        "tp": 0
+      },
+      "positive_rate": 0.37254901960784315
+    },
+    "reliability_test": [
+      {
+        "bin": "0.0-0.2",
+        "n": 9,
+        "mean_predicted_risk": 0.15,
+        "observed_positive_rate": 0.111
+      },
+      {
+        "bin": "0.2-0.4",
+        "n": 25,
+        "mean_predicted_risk": 0.286,
+        "observed_positive_rate": 0.28
+      },
+      {
+        "bin": "0.4-0.6",
+        "n": 13,
+        "mean_predicted_risk": 0.462,
+        "observed_positive_rate": 0.538
+      },
+      {
+        "bin": "0.6-0.8",
+        "n": 3,
+        "mean_predicted_risk": 0.665,
+        "observed_positive_rate": 1.0
+      },
+      {
+        "bin": "0.8-1.0",
+        "n": 1,
+        "mean_predicted_risk": 0.847,
+        "observed_positive_rate": 1.0
+      }
+    ],
+    "n_train": 199,
+    "n_test": 51
+  },
+  "ablation": {
+    "majority_baseline": {
+      "n_folds": 15,
+      "accuracy": {
+        "mean": 0.6359631852741097,
+        "std": 0.0070778407092201776
+      },
+      "precision": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "recall": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "f1_positive": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "macro_f1": {
+        "mean": 0.3887286427941733,
+        "std": 0.0026395319433572656
+      },
+      "roc_auc": {
+        "mean": 0.5,
+        "std": 0.0
+      },
+      "pr_auc": {
+        "mean": 0.3640368147258903,
+        "std": 0.00707784070922017
+      },
+      "brier": {
+        "mean": 0.23154086037008575,
+        "std": 0.0019125807787380826
+      },
+      "ece": {
+        "mean": 0.007591737422487166,
+        "std": 0.004136477543982093
+      },
+      "pooled_confusion_matrix": {
+        "tn": 477,
+        "fp": 0,
+        "fn": 273,
+        "tp": 0
+      }
+    },
+    "word_tfidf_1_2": {
+      "n_folds": 15,
+      "accuracy": {
+        "mean": 0.7697649726557291,
+        "std": 0.04670452812078946
+      },
+      "precision": {
+        "mean": 0.8128289303289303,
+        "std": 0.13182535562787756
+      },
+      "recall": {
+        "mean": 0.5029239766081871,
+        "std": 0.1105159277804758
+      },
+      "f1_positive": {
+        "mean": 0.6093102224806841,
+        "std": 0.08569522489055509
+      },
+      "macro_f1": {
+        "mean": 0.7225847017751583,
+        "std": 0.05723032636435286
+      },
+      "roc_auc": {
+        "mean": 0.7945689564004503,
+        "std": 0.04434766291344508
+      },
+      "pr_auc": {
+        "mean": 0.7494984259309629,
+        "std": 0.06690918831340048
+      },
+      "brier": {
+        "mean": 0.1723971360630737,
+        "std": 0.017718588709833342
+      },
+      "ece": {
+        "mean": 0.08914039864009787,
+        "std": 0.031136220072020403
+      },
+      "pooled_confusion_matrix": {
+        "tn": 440,
+        "fp": 37,
+        "fn": 136,
+        "tp": 137
+      }
+    },
+    "word_1_2_plus_char_3_5": {
+      "n_folds": 15,
+      "accuracy": {
+        "mean": 0.7617073496065092,
+        "std": 0.050110302099622014
+      },
+      "precision": {
+        "mean": 0.8059103080155712,
+        "std": 0.15588632978400976
+      },
+      "recall": {
+        "mean": 0.5031189083820663,
+        "std": 0.12700423231183935
+      },
+      "f1_positive": {
+        "mean": 0.5995091356606004,
+        "std": 0.0931201128459482
+      },
+      "macro_f1": {
+        "mean": 0.7139355363099601,
+        "std": 0.060486049040666144
+      },
+      "roc_auc": {
+        "mean": 0.7996865585681375,
+        "std": 0.05163701535104262
+      },
+      "pr_auc": {
+        "mean": 0.7524040394894126,
+        "std": 0.0699697078613723
+      },
+      "brier": {
+        "mean": 0.1718988215385708,
+        "std": 0.019125453894884736
+      },
+      "ece": {
+        "mean": 0.0833968171962194,
+        "std": 0.02778084342477694
+      },
+      "pooled_confusion_matrix": {
+        "tn": 434,
+        "fp": 43,
+        "fn": 136,
+        "tp": 137
+      }
+    }
+  },
+  "char_decision": {
+    "rule": "use char n-grams only if macro-F1 gain >= 0.01 and > std of word-only",
+    "gain": -0.0086,
+    "word_only_std": 0.0572,
+    "use_char": false
+  },
+  "validation": {
+    "dataset_id": "hoaxnews_ind_temp",
+    "version": "kornwtp-250",
+    "status": "temporary",
+    "rows": 250,
+    "label_counts": {
+      "positive_1": 91,
+      "negative_0": 159
+    },
+    "imbalance_ratio": 1.75,
+    "majority_class_rate": 0.636,
+    "empty_text": 0,
+    "words": {
+      "count": 250.0,
+      "mean": 329.7,
+      "std": 183.2,
+      "min": 96.0,
+      "25%": 211.2,
+      "50%": 289.0,
+      "75%": 399.5,
+      "max": 1263.0
+    },
+    "exact_duplicate_extra_rows": 0,
+    "duplicate_groups_with_conflicting_labels": 0,
+    "issues": [
+      {
+        "severity": "warn",
+        "code": "small_dataset",
+        "message": "Only 250 rows (< 500). Metrics will have high variance."
+      },
+      {
+        "severity": "warn",
+        "code": "small_minority",
+        "message": "Minority class has 91 rows (< 100)."
+      },
+      {
+        "severity": "warn",
+        "code": "temporary_dataset",
+        "message": "Dataset is marked TEMPORARY: results are for pipeline testing only."
+      }
+    ],
+    "has_blocking_error": false,
+    "prepare_log": {
+      "rows_in": 250,
+      "removed_unmapped_label": 0,
+      "removed_empty": 0,
+      "removed_conflicting_duplicates": 0,
+      "removed_exact_duplicates": 0,
+      "rows_out": 250,
+      "removed_ids": {
+        "unmapped_label": [],
+        "empty": [],
+        "conflicting_duplicates": [],
+        "exact_duplicates": []
+      }
+    }
+  },
+  "group_summary": {
+    "n_groups": 224,
+    "groups_with_more_than_one_row": 21,
+    "rows_in_multi_row_groups": 47,
+    "groups_with_conflicting_labels": 4,
+    "largest_group": 4
+  },
+  "model_version": "hoaxnews_ind_temp-20261003-eae3246a"
+}

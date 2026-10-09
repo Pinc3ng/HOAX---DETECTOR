@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>ANTARA News - Terkini (fixture)</title>
+    <link>https://antara.test/</link>
+    <description>fixture</description>
+    <item>
+      <title>Kemenkes: bawang putih tidak terbukti sembuhkan COVID-19</title>
+      <link>https://www.antaranews.com/berita/111/kemenkes-bawang-putih?utm_medium=rss</link>
+      <description><![CDATA[<p>Kementerian Kesehatan menegaskan <b>belum ada bukti ilmiah</b> bahwa bawang putih dapat menyembuhkan COVID-19.</p>]]></description>
+      <pubDate>Tue, 06 Oct 2026 10:00:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Harga emas Antam hari ini turun</title>
+      <link>https://www.antaranews.com/berita/222/harga-emas-antam</link>
+      <description>Harga emas batangan turun Rp5.000 per gram.</description>
+      <pubDate>Tue, 06 Oct 2026 09:00:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Warga kenakan baju putih di upacara</title>
+      <link>https://www.antaranews.com/berita/333/baju-putih-upacara</link>
+      <description>Ratusan warga hadir dalam upacara.</description>
+      <pubDate>Tue, 06 Oct 2026 08:00:00 +0700</pubDate>
+    </item>
+    <item>
+      <title>Harga bawang putih naik jelang Lebaran</title>
+      <link>https://www.antaranews.com/berita/444/harga-bawang-putih-naik</link>
+      <description>Pedagang pasar mengeluhkan kenaikan harga bawang putih impor.</description>
+      <pubDate>Tue, 06 Oct 2026 07:00:00 +0700</pubDate>
+    </item>
+  </channel>
+</rss>

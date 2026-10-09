@@ -1,0 +1,459 @@
+{
+  "marker_prevalence": {
+    "verdict_words": {
+      "share_positive": 0.264,
+      "share_negative": 0.484,
+      "gap": 0.221,
+      "fisher_p": 0.0007719051764413522,
+      "severity": "warn",
+      "top_matches_positive": [
+        [
+          "klarifikasi",
+          11
+        ],
+        [
+          "salah",
+          10
+        ],
+        [
+          "fakta",
+          6
+        ],
+        [
+          "penjelasan",
+          3
+        ],
+        [
+          "palsu",
+          2
+        ],
+        [
+          "kesimpulan",
+          2
+        ]
+      ],
+      "top_matches_negative": [
+        [
+          "hoax",
+          61
+        ],
+        [
+          "klarifikasi",
+          27
+        ],
+        [
+          "salah",
+          22
+        ],
+        [
+          "penjelasan",
+          22
+        ],
+        [
+          "fakta",
+          13
+        ],
+        [
+          "hoaks",
+          13
+        ]
+      ]
+    },
+    "factcheck_sites": {
+      "share_positive": 0.011,
+      "share_negative": 0.0,
+      "gap": 0.011,
+      "fisher_p": 0.364,
+      "severity": "info",
+      "top_matches_positive": [
+        [
+          "kominfo",
+          1
+        ]
+      ],
+      "top_matches_negative": []
+    },
+    "outlets": {
+      "share_positive": 0.11,
+      "share_negative": 0.233,
+      "gap": 0.123,
+      "fisher_p": 0.018438885158742778,
+      "severity": "warn",
+      "top_matches_positive": [
+        [
+          "cnn indonesia",
+          3
+        ],
+        [
+          "tribunnews",
+          2
+        ],
+        [
+          "tirto",
+          2
+        ],
+        [
+          "detikhealth",
+          1
+        ],
+        [
+          "cnbc",
+          1
+        ],
+        [
+          "detikcom",
+          1
+        ]
+      ],
+      "top_matches_negative": [
+        [
+          "detikhealth",
+          7
+        ],
+        [
+          "cnbc",
+          5
+        ],
+        [
+          "detikcom",
+          5
+        ],
+        [
+          "republika.co.id",
+          4
+        ],
+        [
+          "okezone",
+          3
+        ],
+        [
+          "liputan6",
+          2
+        ]
+      ]
+    },
+    "bracket_tags": {
+      "share_positive": 0.0,
+      "share_negative": 0.0,
+      "gap": 0.0,
+      "fisher_p": 1.0,
+      "severity": "info",
+      "top_matches_positive": [],
+      "top_matches_negative": []
+    },
+    "forward_phrases": {
+      "share_positive": 0.363,
+      "share_negative": 0.516,
+      "gap": 0.153,
+      "fisher_p": 0.02480163660577723,
+      "severity": "warn",
+      "top_matches_positive": [
+        [
+          "beredar",
+          32
+        ],
+        [
+          "viral",
+          9
+        ],
+        [
+          "broadcast",
+          4
+        ],
+        [
+          "sebarkan",
+          1
+        ]
+      ],
+      "top_matches_negative": [
+        [
+          "beredar",
+          123
+        ],
+        [
+          "viral",
+          22
+        ],
+        [
+          "broadcast",
+          6
+        ],
+        [
+          "berantai",
+          4
+        ],
+        [
+          "share",
+          3
+        ],
+        [
+          "sebarkan",
+          1
+        ]
+      ]
+    },
+    "url": {
+      "share_positive": 0.0,
+      "share_negative": 0.019,
+      "gap": 0.019,
+      "fisher_p": 0.5557516517683638,
+      "severity": "info",
+      "top_matches_positive": [],
+      "top_matches_negative": [
+        [
+          "http://www.amazon.com/fuchs-toothbrushes-natural-bristle-assorted/dp/b018iwrz9k/ref=sr_1_3?s=beauty&ie=utf8&qid=1455426484&sr=1-3&keywords=boar+bristle+toothbrush)",
+          1
+        ],
+        [
+          "http://www.amazon.com/dp/b0152bo0f2?psc=1.",
+          1
+        ],
+        [
+          "www.pom.go.id",
+          1
+        ],
+        [
+          "http://www.akozo.net/2016/07/download-pokemon-go-apk-for-android.html\"\"",
+          1
+        ],
+        [
+          "https://sso.pokemon.com/sso/",
+          1
+        ]
+      ]
+    }
+  },
+  "style_shortcuts": {
+    "word_count": {
+      "auc_as_single_feature": 0.546,
+      "median_positive": 315.0,
+      "median_negative": 279.0,
+      "severity": "info"
+    },
+    "upper_ratio": {
+      "auc_as_single_feature": 0.541,
+      "median_positive": 0.03626306084818685,
+      "median_negative": 0.03503960999390616,
+      "severity": "info"
+    },
+    "digit_ratio": {
+      "auc_as_single_feature": 0.438,
+      "median_positive": 0.005509641873278237,
+      "median_negative": 0.006884299355984899,
+      "severity": "info"
+    },
+    "exclamation_count": {
+      "auc_as_single_feature": 0.567,
+      "median_positive": 0.0,
+      "median_negative": 0.0,
+      "severity": "info"
+    },
+    "quote_count": {
+      "auc_as_single_feature": 0.464,
+      "median_positive": 6.0,
+      "median_negative": 10.0,
+      "severity": "info"
+    },
+    "avg_word_len": {
+      "auc_as_single_feature": 0.441,
+      "median_positive": 6.075757575757576,
+      "median_negative": 6.167567567567567,
+      "severity": "info"
+    },
+    "starts_with_quote": {
+      "auc_as_single_feature": 0.495,
+      "median_positive": 1.0,
+      "median_negative": 1.0,
+      "severity": "info"
+    },
+    "starts_with_dateline": {
+      "auc_as_single_feature": 0.465,
+      "median_positive": 0.0,
+      "median_negative": 0.0,
+      "severity": "info"
+    }
+  },
+  "discriminative_tokens": {
+    "top_positive_class": [
+      "mengoles",
+      "kue",
+      "presiden",
+      "bitungnews",
+      "merias",
+      "salon",
+      "bela",
+      "lukis",
+      "acting",
+      "alun",
+      "kaayu",
+      "pembersih",
+      "lantai",
+      "tahukah",
+      "leher",
+      "tuntutan",
+      "tradisional",
+      "suntik",
+      "pantauan",
+      "parkir"
+    ],
+    "top_negative_class": [
+      "martinus",
+      "arab",
+      "empat",
+      "bnn",
+      "hurairah",
+      "setyo",
+      "bohong",
+      "narkotika",
+      "jemaah",
+      "yordania",
+      "gereja",
+      "mainan",
+      "ramadhan",
+      "risiko",
+      "chu",
+      "niantic",
+      "seribu",
+      "mabes",
+      "area",
+      "bbpom"
+    ],
+    "flagged_as_marker_positive": [],
+    "flagged_as_marker_negative": [],
+    "note": "Tokens are ranked by smoothed log-odds on the full dataset; they describe the data, not the truth of any article."
+  },
+  "near_duplicate_groups": {
+    "threshold": 0.9,
+    "n_groups": 224,
+    "groups_with_more_than_one_row": 21,
+    "rows_in_multi_row_groups": 47,
+    "groups_with_conflicting_labels": 4,
+    "largest_group": 4
+  },
+  "shortcut_probes_cv": {
+    "majority_baseline": {
+      "macro_f1": {
+        "mean": 0.3887286427941733,
+        "std": 0.0026395319433572656
+      },
+      "roc_auc": {
+        "mean": 0.5,
+        "std": 0.0
+      },
+      "pr_auc": {
+        "mean": 0.3640368147258903,
+        "std": 0.00707784070922017
+      }
+    },
+    "full_text": {
+      "macro_f1": {
+        "mean": 0.7225847017751583,
+        "std": 0.05723032636435286
+      },
+      "roc_auc": {
+        "mean": 0.7945689564004503,
+        "std": 0.04434766291344508
+      },
+      "pr_auc": {
+        "mean": 0.7494984259309629,
+        "std": 0.06690918831340048
+      }
+    },
+    "markers_neutralized": {
+      "macro_f1": {
+        "mean": 0.7225847017751583,
+        "std": 0.05723032636435286
+      },
+      "roc_auc": {
+        "mean": 0.794779352428263,
+        "std": 0.0440424581252378
+      },
+      "pr_auc": {
+        "mean": 0.7489522417667346,
+        "std": 0.0675783206649215
+      }
+    },
+    "markers_neutralized_and_dateline_stripped": {
+      "macro_f1": {
+        "mean": 0.7225847017751583,
+        "std": 0.05723032636435286
+      },
+      "roc_auc": {
+        "mean": 0.7952486332862677,
+        "std": 0.04454070206627408
+      },
+      "pr_auc": {
+        "mean": 0.7492543524624082,
+        "std": 0.06778124747791843
+      }
+    },
+    "first_20_words_only": {
+      "macro_f1": {
+        "mean": 0.5583989810167004,
+        "std": 0.07527354675324888
+      },
+      "roc_auc": {
+        "mean": 0.6797773647625092,
+        "std": 0.06921490585144782
+      },
+      "pr_auc": {
+        "mean": 0.5943216546704571,
+        "std": 0.10438269533729594
+      }
+    },
+    "last_20_words_only": {
+      "macro_f1": {
+        "mean": 0.519547637119371,
+        "std": 0.08444008824783591
+      },
+      "roc_auc": {
+        "mean": 0.6150205840712348,
+        "std": 0.05863816185753763
+      },
+      "pr_auc": {
+        "mean": 0.535741422692544,
+        "std": 0.07610031170245397
+      }
+    },
+    "length_only_logreg": {
+      "macro_f1": {
+        "mean": 0.49860479326500345,
+        "std": 0.08648978362490997
+      },
+      "roc_auc": null,
+      "pr_auc": null
+    }
+  },
+  "cv_setup": {
+    "n_splits": 5,
+    "n_repeats": 3,
+    "seed": 42,
+    "grouped": true
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "code": "near_duplicates",
+      "message": "47 rows belong to 21 near-duplicate groups (cosine >= 0.9); conflicting-label groups: 4.",
+      "impact": "Handled by group-aware splits so near-duplicates never straddle train/test."
+    },
+    {
+      "severity": "warn",
+      "code": "marker_verdict_words",
+      "message": "'verdict_words' appears in 26% of positive vs 48% of negative rows (Fisher p=0.000772).",
+      "impact": "The classifier can use this as a shortcut instead of linguistic risk patterns; scores will not generalise to articles without this marker."
+    },
+    {
+      "severity": "warn",
+      "code": "marker_outlets",
+      "message": "'outlets' appears in 11% of positive vs 23% of negative rows (Fisher p=0.0184).",
+      "impact": "The classifier can use this as a shortcut instead of linguistic risk patterns; scores will not generalise to articles without this marker."
+    },
+    {
+      "severity": "warn",
+      "code": "length_alone_predicts",
+      "message": "Article length alone gives macro-F1=0.499 (majority baseline 0.389).",
+      "impact": "Length is a collection artefact, not a hoax signal."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+domain,tier,description
+kompas.com,HIGH,Established national news media
+tempo.co,HIGH,Established national news media and fact-checker
+antaranews.com,HIGH,National news agency
+turnbackhoax.id,HIGH,Dedicated fact-checking organization
+cekfakta.com,HIGH,Collaborative fact-checking platform
+who.int,HIGH,International health organization
+kemkes.go.id,HIGH,Official government health ministry
+tribunnews.com,MEDIUM,Popular news aggregator with user-generated content
+liputan6.com,MEDIUM,National news media
+detik.com,MEDIUM,National news media
+seword.com,LOW,Opinion blog
+posmetro.info,LOW,Known for clickbait and sensationalism
+nusanews.com,BLACKLISTED,Known disinformation site

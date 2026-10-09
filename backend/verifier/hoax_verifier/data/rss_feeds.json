@@ -1,0 +1,8 @@
+[
+  {"name": "antara-terkini", "url": "https://www.antaranews.com/rss/terkini.xml", "category": "news"},
+  {"name": "antara-humaniora", "url": "https://www.antaranews.com/rss/humaniora.xml", "category": "news"},
+  {"name": "cnn-indonesia-nasional", "url": "https://www.cnnindonesia.com/nasional/rss", "category": "news"},
+  {"name": "cnn-indonesia-internasional", "url": "https://www.cnnindonesia.com/internasional/rss", "category": "news"},
+  {"name": "cnn-indonesia-gaya-hidup", "url": "https://www.cnnindonesia.com/gaya-hidup/rss", "category": "news"},
+  {"name": "turnbackhoax", "url": "https://turnbackhoax.id/feed/", "category": "factcheck"}
+]

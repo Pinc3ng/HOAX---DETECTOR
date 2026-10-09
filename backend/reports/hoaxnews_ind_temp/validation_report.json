@@ -1,0 +1,57 @@
+{
+  "dataset_id": "hoaxnews_ind_temp",
+  "version": "kornwtp-250",
+  "status": "temporary",
+  "rows": 250,
+  "label_counts": {
+    "positive_1": 91,
+    "negative_0": 159
+  },
+  "imbalance_ratio": 1.75,
+  "majority_class_rate": 0.636,
+  "empty_text": 0,
+  "words": {
+    "count": 250.0,
+    "mean": 329.7,
+    "std": 183.2,
+    "min": 96.0,
+    "25%": 211.2,
+    "50%": 289.0,
+    "75%": 399.5,
+    "max": 1263.0
+  },
+  "exact_duplicate_extra_rows": 0,
+  "duplicate_groups_with_conflicting_labels": 0,
+  "issues": [
+    {
+      "severity": "warn",
+      "code": "small_dataset",
+      "message": "Only 250 rows (< 500). Metrics will have high variance."
+    },
+    {
+      "severity": "warn",
+      "code": "small_minority",
+      "message": "Minority class has 91 rows (< 100)."
+    },
+    {
+      "severity": "warn",
+      "code": "temporary_dataset",
+      "message": "Dataset is marked TEMPORARY: results are for pipeline testing only."
+    }
+  ],
+  "has_blocking_error": false,
+  "prepare_log": {
+    "rows_in": 250,
+    "removed_unmapped_label": 0,
+    "removed_empty": 0,
+    "removed_conflicting_duplicates": 0,
+    "removed_exact_duplicates": 0,
+    "rows_out": 250,
+    "removed_ids": {
+      "unmapped_label": [],
+      "empty": [],
+      "conflicting_duplicates": [],
+      "exact_duplicates": []
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "claims": [
+    {
+      "text": "Bawang putih dapat menyembuhkan COVID-19",
+      "claimant": "Pesan berantai WhatsApp",
+      "claimDate": "2020-03-10T00:00:00Z",
+      "claimReview": [
+        {
+          "publisher": {"name": "TurnBackHoax", "site": "turnbackhoax.id"},
+          "url": "https://turnbackhoax.id/2020/03/12/salah-bawang-putih-sembuhkan-covid-19/?utm_source=factcheck",
+          "title": "[SALAH] Bawang putih sembuhkan COVID-19",
+          "reviewDate": "2020-03-12T08:00:00Z",
+          "textualRating": "Salah",
+          "languageCode": "id"
+        }
+      ]
+    },
+    {
+      "text": "Garlic cures coronavirus",
+      "claimant": "Social media",
+      "claimReview": [
+        {
+          "publisher": {"name": "Example Fact Checker", "site": "www.example-factcheck.org"},
+          "url": "https://www.example-factcheck.org/garlic-covid",
+          "title": "No, garlic does not cure COVID-19",
+          "reviewDate": "2020-03-15",
+          "textualRating": "False",
+          "languageCode": "en"
+        }
+      ]
+    }
+  ]
+}

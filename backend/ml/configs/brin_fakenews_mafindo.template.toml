@@ -1,0 +1,36 @@
+# TEMPLATE for the final BRIN/MAFINDO dataset. Copy, then fill in after dataset access is approved
+# AND after running the dataset audit (ml/audit/audit_dataset.py). Column names below are what the
+# dataset card lists for nlp-brin-id/fakenews-mafindo; VERIFY against df.columns before use.
+dataset_id = "brin_fakenews_mafindo"
+version = "FILL-IN (HF revision sha)"
+status = "final"
+raw_path = "data/raw/brin_fakenews_mafindo.csv"
+notes = "Final dataset. Audit result: see docs/dataset_audit.md"
+
+[source]
+type = "huggingface"
+repo = "nlp-brin-id/fakenews-mafindo"     # or nlp-brin-id/id-hoax-report-merge-v3
+
+[columns]
+id = ""
+title = "Title"
+content = "Content"
+label = "Label"
+
+[label_map]
+HOAX = 1
+NON-HOAX = 0
+
+[cleaning]
+drop_empty = true
+dedupe_exact = true
+drop_conflicting_duplicates = true
+
+[model]
+seed = 42
+test_size = 0.2
+near_duplicate_threshold = 0.9
+cv_splits = 5
+cv_repeats = 3
+risk_threshold_low = 0.35
+risk_threshold_high = 0.65
