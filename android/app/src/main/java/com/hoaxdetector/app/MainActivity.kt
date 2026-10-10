@@ -12,12 +12,11 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private var appWebView: WebView? = null
@@ -50,7 +49,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppWebViewContainer(onWebViewReady: (WebView) -> Unit) {
     AndroidView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         factory = { context ->
             WebView(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
@@ -60,7 +62,6 @@ fun AppWebViewContainer(onWebViewReady: (WebView) -> Unit) {
                 settings.apply {
                     javaScriptEnabled = true
                     domStorageEnabled = true
-                    databaseEnabled = true
                     allowFileAccess = true
                     allowContentAccess = true
                     mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
