@@ -97,23 +97,57 @@ object IndonesianNlpEngine {
     }
 
     private fun checkFactualJournalism(lower: String): Boolean {
-        val hasOfficial = lower.contains("presiden") || lower.contains("menteri") ||
-                lower.contains("kementerian") || lower.contains("kemendikbud") || lower.contains("kemenkes") ||
-                lower.contains("bmkg") || lower.contains("kpu") || lower.contains("polri") ||
-                lower.contains("tni") || lower.contains("bpom") || lower.contains("brin") ||
-                lower.contains("who") || lower.contains("unesco") || lower.contains("fifa") ||
-                lower.contains("bank indonesia") || lower.contains("pertamina") || lower.contains("pemprov")
+        // Daftar institusi, pejabat, organisasi, dan entitas resmi
+        val hasOfficialEntity = lower.contains("presiden") || lower.contains("wakil presiden") ||
+                lower.contains("menteri") || lower.contains("kementerian") || lower.contains("kemendikbud") ||
+                lower.contains("kemenkes") || lower.contains("kemenkeu") || lower.contains("kemenag") ||
+                lower.contains("kemenhub") || lower.contains("kominfo") || lower.contains("komdigi") ||
+                lower.contains("gubernur") || lower.contains("bupati") || lower.contains("walikota") ||
+                lower.contains("dpr") || lower.contains("mpr") || lower.contains("kpk") || lower.contains("polri") ||
+                lower.contains("tni") || lower.contains("bpom") || lower.contains("brin") || lower.contains("bmkg") ||
+                lower.contains("bps") || lower.contains("bank indonesia") || lower.contains("ojk") ||
+                lower.contains("pertamina") || lower.contains("pln") || lower.contains("kai") ||
+                lower.contains("kejaksaan") || lower.contains("pemprov") || lower.contains("pemkab") ||
+                lower.contains("who") || lower.contains("unesco") || lower.contains("pbb") ||
+                lower.contains("fifa") || lower.contains("afc") || lower.contains("pssi") || lower.contains("timnas") ||
+                lower.contains("universitas") || lower.contains("ugm") || lower.contains("ui") || lower.contains("itb") ||
+                lower.contains("jokowi") || lower.contains("prabowo") || lower.contains("gibran") || lower.contains("sri mulyani") ||
+                lower.contains("ikn") || lower.contains("nusantara") || lower.contains("kereta cepat") || lower.contains("whoosh")
 
-        val hasAction = lower.contains("resmi") || lower.contains("mengumumkan") ||
+        // Daftar verba aksi dan predikat jurnalistik baku
+        val hasJournalisticAction = lower.contains("resmi") || lower.contains("mengumumkan") ||
                 lower.contains("meresmikan") || lower.contains("melantik") || lower.contains("menetapkan") ||
+                lower.contains("merilis") || lower.contains("menerbitkan") || lower.contains("menggelar") ||
+                lower.contains("menandatangani") || lower.contains("meninjau") || lower.contains("membuka") ||
                 lower.contains("meraih") || lower.contains("menjuarai") || lower.contains("menang") ||
-                lower.contains("berdasarkan data") || lower.contains("hasil riset") ||
-                lower.contains("penelitian") || lower.contains("studi")
+                lower.contains("mengalahkan") || lower.contains("lolos") || lower.contains("mencatat") ||
+                lower.contains("mencatatkan") || lower.contains("melaporkan") || lower.contains("menyatakan") ||
+                lower.contains("menegaskan") || lower.contains("mengonfirmasi") || lower.contains("menyalurkan") ||
+                lower.contains("membangun") || lower.contains("menyepakati") || lower.contains("mengamankan") ||
+                lower.contains("berdasarkan data") || lower.contains("hasil riset") || lower.contains("penelitian") ||
+                lower.contains("studi") || lower.contains("survei") || lower.contains("konferensi pers") ||
+                lower.contains("siaran pers")
 
+        // Indikator topik faktual (Olahraga, Cuaca/Bencana Alam, Perekonomian, Pendidikan, Infrastruktur)
+        val hasFactualTopic = lower.contains("gempa") || lower.contains("magnitudo") || lower.contains("skala richter") ||
+                lower.contains("prakiraan cuaca") || lower.contains("hujan lebat") || lower.contains("bmkg") ||
+                lower.contains("kualifikasi") || lower.contains("piala dunia") || lower.contains("piala asia") ||
+                lower.contains("medali emas") || lower.contains("pertandingan") || lower.contains("skor") ||
+                lower.contains("jalan tol") || lower.contains("stasiun") || lower.contains("bandara") ||
+                lower.contains("inflasi") || lower.contains("rupiah") || lower.contains("apbn") ||
+                lower.contains("ekspor") || lower.contains("impor") || lower.contains("beasiswa") ||
+                lower.contains("utbk") || lower.contains("snbp") || lower.contains("snbt") ||
+                lower.contains("peringkat") || lower.contains("ranking dunia")
+
+        // Pola hoaks/konspirasi yang mendiskualifikasi
         val hasConspiracy = lower.contains("anak angkat") || lower.contains("selingkuh") ||
-                lower.contains("rahasia keluarga") || lower.contains("palsu") || lower.contains("dalang")
+                lower.contains("rahasia keluarga") || lower.contains("palsu") || lower.contains("dalang") ||
+                lower.contains("terbongkar") || lower.contains("bocoran rahasia") || lower.contains("chip magnet") ||
+                lower.contains("dilarang dokter") || lower.contains("konspirasi") || lower.contains("diancam")
 
-        return hasOfficial && hasAction && !hasConspiracy
+        // Jika mengandung entitas resmi ATAU topik faktual, plus aksi jurnalistik, dan bebas dari konspirasi
+        val isFactual = (hasOfficialEntity || hasFactualTopic) && (hasJournalisticAction || hasFactualTopic) && !hasConspiracy
+        return isFactual
     }
 
     private fun checkClickbait(lower: String): Boolean {
@@ -121,6 +155,9 @@ object IndonesianNlpEngine {
                 lower.contains("gempar!") || lower.contains("jangan sampai telat") ||
                 lower.contains("sebarkan sebelum dihapus") || lower.contains("dilarang dokter") ||
                 lower.contains("mengejutkan publik") || lower.contains("bocor!") ||
-                lower.contains("konspirasi elit") || lower.contains("semua orang tertipu")
+                lower.contains("konspirasi elit") || lower.contains("semua orang tertipu") ||
+                lower.contains("klik link ini") || lower.contains("bagikan ke 5 grup") ||
+                lower.contains("dapatkan bansos gratis") || lower.contains("klaim saldo dana") ||
+                lower.contains("share wa") || lower.contains("bocoran istana")
     }
 }

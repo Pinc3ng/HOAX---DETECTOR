@@ -1,7 +1,7 @@
 {
   "name": "hoax-detector-backend",
   "version": "1.0.0",
-  "description": "Backend AI untuk Hoax Detector App menggunakan Gemini API",
+  "description": "Backend Proxy dan Gateway untuk HOAX-DETECTOR MELALUI NLI",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

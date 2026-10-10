@@ -47,7 +47,8 @@ data class BuktiItem(
 @Serializable
 data class SumberReferensi(
     val nama: String,
-    val keterangan: String
+    val keterangan: String,
+    val url: String? = null
 )
 
 @Serializable
@@ -63,5 +64,5 @@ data class HealthResponse(
     val status: String,
     val service: String,
     val version: String,
-    val geminiConfigured: Boolean
+    val nliConfigured: Boolean = true
 )

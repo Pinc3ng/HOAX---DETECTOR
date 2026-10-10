@@ -91,7 +91,7 @@ fun ResultScreen(
                 onNavigateBack = onNavigateBack,
                 onShareClick = {
                     val shareText = buildString {
-                        append("🔍 *[HOAX DETECTOR AI]*\n")
+                        append("🔍 *[HOAX-DETECTOR MELALUI NLI]*\n")
                         append("Status: *${item.status}* (${item.analysisResult.confidenceScore}%)\n\n")
                         append("📌 *Klaim/Informasi:*\n")
                         append("\"${item.inputText.take(250)}\"\n\n")
@@ -99,7 +99,7 @@ fun ResultScreen(
                         append("${item.analysisResult.ringkasan}\n\n")
                         append("💡 *Penjelasan:*\n")
                         append("${item.analysisResult.penjelasan}\n\n")
-                        append("— Diperiksa secara akurat menggunakan Aplikasi Hoax Detector")
+                        append("— Diperiksa secara akurat menggunakan HOAX-DETECTOR MELALUI NLI (Python Engine)")
                     }
                     val sendIntent = Intent().apply {
                         action = Intent.ACTION_SEND
@@ -492,28 +492,52 @@ private fun EvidenceItem(bukti: BuktiItem) {
 
 @Composable
 private fun SourceItem(sumber: SumberReferensi) {
+    val context = LocalContext.current
+    val hasUrl = !sumber.url.isNullOrBlank()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(NavySurface)
+            .clickable(enabled = hasUrl) {
+                if (hasUrl) {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(sumber.url))
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        // ignore error opening url
+                    }
+                }
+            }
             .padding(10.dp),
         verticalAlignment = Alignment.Top
     ) {
         Icon(
-            Icons.Default.BookmarkAdded,
+            if (hasUrl) Icons.Default.OpenInNew else Icons.Default.BookmarkAdded,
             contentDescription = null,
-            tint = StatusGreen,
-            modifier = Modifier.size(14.dp).padding(top = 2.dp)
+            tint = if (hasUrl) ElectricBlue else StatusGreen,
+            modifier = Modifier.size(16.dp).padding(top = 2.dp)
         )
         Spacer(Modifier.width(8.dp))
-        Column {
-            Text(
-                text = sumber.nama,
-                style = MaterialTheme.typography.labelMedium,
-                color = StatusGreen,
-                fontWeight = FontWeight.SemiBold
-            )
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = sumber.nama,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (hasUrl) ElectricBlueLight else StatusGreen,
+                    fontWeight = FontWeight.SemiBold
+                )
+                if (hasUrl) {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "• Buka Link",
+                        fontSize = 10.sp,
+                        color = ElectricBlue,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
             Text(
                 text = sumber.keterangan,
                 style = MaterialTheme.typography.bodySmall,

@@ -440,14 +440,14 @@ fun CheckScreen(
                     )
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        text = "Menganalisis dengan Gemini AI...",
+                        text = "Menganalisis dengan Algoritma NLI (Python)...",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = White
                     )
                 } else {
                     Text(
-                        text = "Analisis dengan AI",
+                        text = "Analisis Berbasis NLI",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = White
