@@ -21,8 +21,25 @@
           colors: {
             "primary": "#00333a",
             "primary-container": "#174a52",
-            "primary-light": "#0d5c68",
-            "editorial-gold": "#b45309",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#89b9c2",
+            "secondary": "#3159b8",
+            "surface": "#f8f9ff",
+            "on-surface": "#181c22",
+            "on-surface-variant": "#40484a",
+            "surface-container": "#ebeef6",
+            "surface-container-low": "#f1f3fc",
+            "surface-container-high": "#e5e8f0",
+            "surface-container-lowest": "#ffffff",
+            "outline": "#70787a",
+            "outline-variant": "#c0c8ca",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+            "tertiary": "#003522",
+            "tertiary-container": "#004e33",
+            "tertiary-fixed": "#a6f3ca",
+            "on-tertiary-fixed": "#002113",
             "dark-bg": "#0c1117",
             "dark-card": "#161e2a",
             "dark-card-soft": "#1d2737",
@@ -75,39 +92,34 @@
   <main class="w-full max-w-md h-full bg-[#f8f9ff] dark:bg-dark-bg flex flex-col relative sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-700/40 dark:border-dark-border sm:ring-1 sm:ring-white/10 transition-colors duration-200">
 
     <!-- ============================================================== -->
-    <!-- TOP APP HEADER & CONTROLS                                      -->
+    <!-- STITCH TOP APP BAR                                             -->
     <!-- ============================================================== -->
-    <header class="w-full bg-white dark:bg-dark-card border-b border-slate-200 dark:border-dark-border px-4 py-3 flex items-center justify-between z-20 flex-none transition-colors duration-200">
-      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchView('home')">
-        <img src="logo.png" alt="Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover border border-primary/20 dark:border-teal-500/30" onerror="this.src='/static/logo.png'" />
-        <div>
-          <div class="flex items-center gap-1.5">
-            <span class="font-bold text-sm tracking-tight text-primary dark:text-teal-300">HOAX DETECTOR</span>
-            <span class="px-1.5 py-0.2 text-[9px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 rounded-full border border-emerald-300 dark:border-emerald-700">PYTHON NLI</span>
-          </div>
-          <p id="txt-header-subtitle" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Klarifikasi Berita & Cek Fakta Cerdas</p>
-        </div>
+    <header class="w-full bg-surface dark:bg-dark-card border-b border-outline-variant/30 dark:border-dark-border px-4 py-2.5 flex items-center justify-between z-20 flex-none transition-colors duration-200">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchView('home')">
+        <span class="material-symbols-outlined text-primary-container dark:text-teal-400 text-[22px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+        <h1 class="font-headline text-lg tracking-tight font-semibold text-primary dark:text-inverse-primary">HOAX DETECTOR</h1>
       </div>
 
       <!-- Action Icons: Notifications, Theme Toggle, User Profile -->
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-2">
         <!-- Notification Button with badge -->
-        <button onclick="toggleNotificationDrawer()" id="btn-notifications" title="Pusat Notifikasi" class="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-teal-300 hover:bg-slate-100 dark:hover:bg-dark-card-soft transition">
+        <button onclick="toggleNotificationDrawer()" id="btn-notifications" aria-label="Notifikasi" title="Notifikasi" class="text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-high/50 p-1.5 rounded-lg flex items-center justify-center relative transition">
           <span class="material-symbols-outlined text-[20px]">notifications</span>
-          <span id="badge-notif-count" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white dark:border-dark-card rounded-full"></span>
+          <span id="badge-notif-count" class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
         </button>
 
         <!-- Dark/Light Mode Switcher -->
-        <button id="btn-toggle-theme" onclick="toggleTheme()" title="Ganti Mode Terang/Gelap" class="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-teal-300 hover:bg-slate-100 dark:hover:bg-dark-card-soft transition">
+        <button id="btn-toggle-theme" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Mode Terang/Gelap" class="text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-high/50 p-1.5 rounded-lg flex items-center justify-center transition">
           <span id="theme-icon" class="material-symbols-outlined text-[20px]">dark_mode</span>
         </button>
 
-        <!-- User Profile / Auth Button -->
-        <button onclick="openAuthModal()" id="btn-profile-badge" title="Akun Pengguna" class="p-1.5 ml-0.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-card-soft transition flex items-center gap-1.5">
-          <div id="avatar-circle" class="w-7 h-7 rounded-full bg-teal-800 text-white font-bold text-xs flex items-center justify-center border border-teal-500/40">
-            ?
+        <!-- User Profile Pill (Stitch Component) -->
+        <div onclick="openAuthModal()" class="flex items-center gap-1.5 pl-2 pr-1 py-0.5 bg-surface-container dark:bg-dark-card-soft border border-outline-variant/40 rounded-full cursor-pointer hover:opacity-80 transition">
+          <span id="txt-header-user" class="text-[11px] text-on-surface-variant dark:text-slate-300 font-medium">Tamu</span>
+          <div id="avatar-circle" class="w-5 h-5 rounded-full bg-primary-container text-white flex items-center justify-center text-[10px] font-semibold">
+            <span class="material-symbols-outlined text-[13px]">person</span>
           </div>
-        </button>
+        </div>
       </div>
     </header>
 
@@ -317,79 +329,50 @@
     <div class="flex-1 overflow-y-auto custom-scroll relative pb-6">
 
       <!-- ============================================================== -->
-      <!-- VIEW 1: BERANDA (HOME) — FEED BERITA & HOAKS TERKINI           -->
+      <!-- VIEW 1: BERANDA (HOME) — STITCH EDITORIAL FEED                 -->
       <!-- ============================================================== -->
       <section id="view-home" class="p-4 space-y-4">
         
-        <!-- Breaking Trending Disinformation Alert -->
-        <div id="feed-alert-card" class="bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-rose-500/5 dark:from-rose-950/40 dark:to-amber-950/30 border border-rose-300 dark:border-rose-800/60 rounded-2xl p-3.5 flex items-start gap-3 shadow-xs">
-          <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <span class="material-symbols-outlined text-[18px]">crisis_alert</span>
+        <!-- Editorial Hero Header (Stitch Design) -->
+        <section class="mb-2">
+          <div class="flex items-center gap-1.5 mb-1 text-primary-container dark:text-teal-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary-container dark:bg-teal-400 inline-block"></span>
+            <span class="text-[10px] uppercase tracking-wider font-semibold">Ruang Verifikasi Publik</span>
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between">
-              <span id="txt-alert-badge" class="px-2 py-0.2 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-300 text-[9px] font-bold uppercase tracking-wider">
-                Peringatan Darurat Hoaks
-              </span>
-              <span class="text-[10px] text-slate-400 font-medium">Hari ini</span>
+          <h2 id="txt-banner-claim-title" class="font-headline text-2xl text-on-surface dark:text-white font-semibold tracking-tight mb-1 leading-snug">
+            Jangan langsung percaya. Periksa dulu.
+          </h2>
+          <p id="txt-banner-claim-desc" class="text-xs text-on-surface-variant dark:text-slate-400">
+            Kenali informasi yang perlu diverifikasi sebelum kamu membagikannya.
+          </p>
+          <div class="mt-3">
+            <button onclick="switchView('check-input')" class="w-full bg-primary-container hover:bg-primary active:bg-on-primary-fixed-variant text-white py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 font-semibold text-xs transition-colors shadow-xs">
+              <span class="material-symbols-outlined text-[18px]">search_check</span>
+              <span id="txt-btn-check-now">Periksa Klaim Berita</span>
+              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Pemeriksaan Terkini Section Header (Stitch Design) -->
+        <section>
+          <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-outline-variant/40">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-outline text-[18px]">history_edu</span>
+              <h3 id="txt-feed-header" class="text-sm font-semibold text-on-surface dark:text-white tracking-tight">Pemeriksaan Terkini</h3>
             </div>
-            <h4 id="alert-title" class="text-xs font-bold text-slate-900 dark:text-white mt-1 leading-snug">
-              Waspada Modus Disinformasi Phishing Terbaru!
-            </h4>
-            <p id="alert-desc" class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-snug line-clamp-2">
-              Beredar pesan berantai tawaran subsidi bantuan dana atau kuota gratis melalui tautan Telegram & Google Forms palsu.
-            </p>
-          </div>
-        </div>
-
-        <!-- Call to Action Banner: Mulai Cek Berita Mandiri -->
-        <div class="bg-gradient-to-br from-primary via-primary-container to-slate-900 text-white rounded-2xl p-4 shadow-md flex items-center justify-between relative overflow-hidden">
-          <div class="space-y-1 relative z-10 max-w-[70%]">
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-medium tracking-wide uppercase">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              <span id="txt-nli-active">NLI Engine Siap</span>
-            </span>
-            <h2 id="txt-banner-claim-title" class="font-headline text-base font-bold leading-snug">
-              Punya Berita yang Mencurigakan?
-            </h2>
-            <p id="txt-banner-claim-desc" class="text-[11px] text-white/80">
-              Kirim teks berita atau link untuk diaudit oleh model mDeBERTa-v3.
-            </p>
-          </div>
-          <button onclick="switchView('check-input')" class="relative z-10 px-3.5 py-2.5 rounded-xl bg-white text-primary hover:bg-slate-100 font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1 shrink-0">
-            <span class="material-symbols-outlined text-[16px]">search_check</span>
-            <span id="txt-btn-check-now">Cek Klaim</span>
-          </button>
-          <div class="absolute -right-6 -bottom-8 w-28 h-28 bg-teal-400/10 rounded-full blur-xl pointer-events-none"></div>
-        </div>
-
-        <!-- Feed Section Header with Category Filters -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 id="txt-feed-header" class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-[16px] text-primary dark:text-teal-400">newspaper</span>
-                Feed Klarifikasi Berita Terkini
-              </h3>
-              <p id="txt-feed-subtitle" class="text-[10px] text-slate-500 dark:text-slate-400">Arsip cek fakta terbaru: memisahkan kebenaran dari manipulasi</p>
+            <div class="flex items-center gap-1 text-[11px]">
+              <button onclick="setFeedFilter('ALL')" class="feed-filter-btn px-2.5 py-0.5 rounded-lg font-semibold bg-primary-container text-white">Semua</button>
+              <button onclick="setFeedFilter('HOAKS')" class="feed-filter-btn px-2.5 py-0.5 rounded-lg font-medium text-on-surface-variant dark:text-slate-400 hover:text-primary">Hoaks</button>
+              <button onclick="setFeedFilter('FAKTA')" class="feed-filter-btn px-2.5 py-0.5 rounded-lg font-medium text-on-surface-variant dark:text-slate-400 hover:text-primary">Fakta</button>
             </div>
-            <span class="text-[10px] font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-dark-card-soft px-2 py-0.5 rounded-full border border-teal-200 dark:border-dark-border">
-              Live Feed
-            </span>
           </div>
 
-          <!-- Feed Filter Tabs -->
-          <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] custom-scroll">
-            <button onclick="setFeedFilter('ALL')" class="feed-filter-btn px-3 py-1 rounded-full bg-primary text-white font-medium shadow-xs">Semua</button>
-            <button onclick="setFeedFilter('HOAKS')" class="feed-filter-btn px-3 py-1 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 hover:bg-slate-300 font-medium">Hoaks Terbongkar</button>
-            <button onclick="setFeedFilter('FAKTA')" class="feed-filter-btn px-3 py-1 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 hover:bg-slate-300 font-medium">Fakta Terkonfirmasi</button>
+          <!-- Dynamic Live Feed -->
+          <div id="live-news-feed" class="divide-y divide-outline-variant/30">
+            <div class="text-center py-6 text-xs text-slate-400">Memuat kabar terkini...</div>
           </div>
-        </div>
-
-        <!-- Live News Feed Cards Container -->
-        <div id="live-news-feed" class="space-y-3">
-          <div class="text-center py-6 text-xs text-slate-400">Memuat kabar terkini...</div>
-        </div>
+        </section>
 
       </section>
 
@@ -1294,8 +1277,8 @@
 
       items.forEach(item => {
         const isHoax = item.statusColor === 'red' || item.status.includes('BERTENTANGAN');
-        const card = document.createElement('div');
-        card.className = "bg-white dark:bg-dark-card p-3.5 rounded-2xl border border-slate-200 dark:border-dark-border hover:border-primary/50 dark:hover:border-teal-500/50 transition cursor-pointer shadow-xs space-y-2 group";
+        const card = document.createElement('article');
+        card.className = "py-3 flex flex-col gap-1.5 cursor-pointer group hover:bg-surface-container-high/20 px-1 rounded-lg transition-colors";
         
         // Klik kartu langsung membuka Dossier Hasil Pemeriksaan Lengkap!
         card.onclick = () => {
@@ -1304,27 +1287,28 @@
 
         card.innerHTML = `
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-1.5">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isHoax ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'}">
-                ${isHoax ? '⚠️ HOAKS' : '✅ FAKTA'}
-              </span>
-              <span class="text-[10px] text-slate-400 font-medium">${item.category}</span>
-            </div>
-            <span class="text-[10px] text-slate-400">${item.reads}</span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg ${isHoax ? 'bg-error-container text-on-error-container border border-error/20' : 'bg-tertiary-fixed text-on-tertiary-fixed border border-tertiary/20'} text-[10px] uppercase tracking-wider font-semibold">
+              <span class="material-symbols-outlined text-[13px]">${isHoax ? 'cancel' : 'check_circle'}</span>
+              ${isHoax ? 'Menyesatkan' : 'Didukung Bukti'}
+            </span>
+            <span class="text-[10px] text-outline">${item.reads || 'Terverifikasi'}</span>
           </div>
 
-          <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-snug group-hover:text-primary dark:group-hover:text-teal-300 transition">
-            ${item.title}
+          <h4 class="font-headline text-sm font-semibold text-on-surface dark:text-white leading-snug group-hover:text-primary dark:group-hover:text-teal-300 transition">
+            “${item.title}”
           </h4>
 
-          <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+          <p class="text-xs text-on-surface-variant dark:text-slate-400 line-clamp-2 leading-relaxed">
             ${item.summary}
           </p>
 
-          <div class="pt-2 border-t border-slate-100 dark:border-dark-border flex items-center justify-between text-[10px] text-slate-400">
-            <span>Rujukan: <strong class="text-slate-700 dark:text-slate-300">${item.sources[0] || 'Dewan Pers'}</strong></span>
-            <span class="text-primary dark:text-teal-400 font-semibold flex items-center gap-0.5 group-hover:underline">
-              Lihat Bukti NLI →
+          <div class="flex items-center justify-between pt-0.5 text-[10px] text-outline">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">menu_book</span>
+              Sumber: ${item.sources[0] || 'Tim Cek Fakta'}
+            </span>
+            <span class="text-primary-container dark:text-teal-400 font-semibold group-hover:underline flex items-center gap-0.5">
+              Lihat Bukti →
             </span>
           </div>
         `;
@@ -1335,12 +1319,9 @@
 
     function setFeedFilter(filter) {
       document.querySelectorAll('.feed-filter-btn').forEach(btn => {
-        btn.classList.replace('bg-primary', 'bg-slate-200');
-        btn.classList.replace('dark:bg-teal-700', 'dark:bg-dark-card-soft');
-        btn.classList.replace('text-white', 'text-slate-700');
+        btn.className = "feed-filter-btn px-2.5 py-0.5 rounded-lg font-medium text-on-surface-variant dark:text-slate-400 hover:text-primary transition-colors";
       });
-      event.target.classList.replace('bg-slate-200', 'bg-primary');
-      event.target.classList.replace('text-slate-700', 'text-white');
+      event.target.className = "feed-filter-btn px-2.5 py-0.5 rounded-lg font-semibold bg-primary-container text-white shadow-xs transition-colors";
 
       if (filter === 'ALL') {
         renderNewsFeed(newsFeedData);
