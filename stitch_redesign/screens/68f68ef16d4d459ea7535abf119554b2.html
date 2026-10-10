@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Riwayat Pemeriksaan - Hoax Detector</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed-dim": "#b3c5ff",
+            "surface": "#f8f9ff",
+            "on-secondary": "#ffffff",
+            "error": "#ba1a1a",
+            "on-primary-container": "#89b9c2",
+            "inverse-surface": "#2d3137",
+            "tertiary-fixed": "#a6f3ca",
+            "surface-dim": "#d7dae2",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#002113",
+            "secondary-fixed": "#dbe1ff",
+            "error-container": "#ffdad6",
+            "on-tertiary-container": "#75c09a",
+            "tertiary-container": "#004e33",
+            "outline": "#70787a",
+            "on-tertiary": "#ffffff",
+            "surface-container-high": "#e5e8f0",
+            "on-secondary-container": "#002f7f",
+            "surface-variant": "#dfe2eb",
+            "on-primary-fixed-variant": "#1b4d55",
+            "surface-bright": "#f8f9ff",
+            "surface-container-highest": "#dfe2eb",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#174a52",
+            "surface-container-low": "#f1f3fc",
+            "secondary": "#3159b8",
+            "on-error": "#ffffff",
+            "primary": "#00333a",
+            "on-background": "#181c22",
+            "primary-fixed": "#baebf4",
+            "primary-fixed-dim": "#9fcfd8",
+            "secondary-container": "#769afd",
+            "tertiary": "#003522",
+            "tertiary-fixed-dim": "#8bd6af",
+            "inverse-primary": "#9fcfd8",
+            "outline-variant": "#c0c8ca",
+            "inverse-on-surface": "#eef1f9",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-secondary-fixed-variant": "#0d409f",
+            "background": "#f8f9ff",
+            "surface-tint": "#36656e",
+            "on-surface": "#181c22",
+            "surface-container": "#ebeef6",
+            "on-surface-variant": "#40484a",
+            "on-primary-fixed": "#001f24",
+            "on-secondary-fixed": "#001849"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-lg": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-md": ["Newsreader"],
+            "label-sm": ["Inter"],
+            "title-md": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-sm": ["Newsreader"],
+            "headline-lg": ["Newsreader"],
+            "body-sm": ["Inter"],
+            "headline-lg-mobile": ["Newsreader"],
+            "body-md": ["Inter"]
+          },
+          "fontSize": {
+            "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+            "label-md": ["11px", { "lineHeight": "14px", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "label-sm": ["10px", { "lineHeight": "12px", "fontWeight": "500" }],
+            "title-md": ["16px", { "lineHeight": "22px", "fontWeight": "600" }],
+            "label-lg": ["13px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "38px", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased flex justify-center min-h-screen">
+<!-- Mobile Device Simulation Frame (393px width fixed / mobile viewport) -->
+<div class="w-full max-w-[393px] min-h-[852px] bg-surface flex flex-col relative pb-24 shadow-sm">
+<!-- 1. Android Status Bar -->
+<div class="w-full h-11 pt-2.5 px-6 flex justify-between items-center text-on-surface select-none z-30">
+<span class="font-body-sm text-body-sm font-semibold tracking-tight">09:41</span>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px]" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="signal_cellular_alt">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- Top App Bar (Consistent with Brand Anchors: Shared Components TopAppBar) -->
+<header class="bg-surface flex justify-between items-center w-full px-space-md py-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md">
+          HD
+        </div>
+<span class="text-headline-sm font-headline-sm tracking-tight font-semibold text-primary">HOAX DETECTOR</span>
+</div>
+<button aria-label="Notifikasi" class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high/50 transition-colors rounded-full">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- 2. Header Title & Editorial Subtitle Section -->
+<section class="px-space-md pt-space-xs pb-space-sm">
+<div class="border-b border-outline-variant/30 pb-space-sm">
+<h1 class="text-headline-md font-headline-md text-primary tracking-tight">Riwayat Pemeriksaan</h1>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Arsip verifikasi informasi pribadi</p>
+</div>
+</section>
+<!-- 3. Search Field -->
+<section class="px-space-md py-space-xs">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-outline text-[19px] pointer-events-none" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg text-body-md font-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container transition-colors" placeholder="Cari riwayat klaim atau kata kunci..." type="text"/>
+</div>
+</section>
+<!-- 4. Filter Chips (Horizontal Scrollable) -->
+<section class="py-space-sm pl-space-md pr-0">
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar pr-space-md select-none">
+<!-- Chip 1: Semua (Active, solid dark teal #174A52) -->
+<button class="bg-primary-container text-on-primary px-3.5 py-1.5 rounded-lg text-label-md font-label-md flex items-center gap-1.5 shrink-0 shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[14px]" data-icon="archive" style="font-variation-settings: 'FILL' 1;">archive</span>
+<span>Semua</span>
+</button>
+<!-- Chip 2: Didukung Bukti -->
+<button class="bg-surface-container-lowest text-on-surface-variant border border-outline-variant/50 hover:bg-surface-container-high/40 px-3 py-1.5 rounded-lg text-label-md font-label-md flex items-center gap-1.5 shrink-0 active:scale-95 transition-all">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span>Didukung Bukti</span>
+</button>
+<!-- Chip 3: Menyesatkan -->
+<button class="bg-surface-container-lowest text-on-surface-variant border border-outline-variant/50 hover:bg-surface-container-high/40 px-3 py-1.5 rounded-lg text-label-md font-label-md flex items-center gap-1.5 shrink-0 active:scale-95 transition-all">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span>Menyesatkan</span>
+</button>
+<!-- Chip 4: Belum Cukup Bukti -->
+<button class="bg-surface-container-lowest text-on-surface-variant border border-outline-variant/50 hover:bg-surface-container-high/40 px-3 py-1.5 rounded-lg text-label-md font-label-md flex items-center gap-1.5 shrink-0 active:scale-95 transition-all">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Belum Cukup Bukti</span>
+</button>
+</div>
+</section>
+<!-- 5. Chronological Verification List -->
+<main class="px-space-md flex flex-col gap-space-md pt-space-xs">
+<!-- Group: Hari ini -->
+<section class="flex flex-col gap-2.5">
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">Hari ini</span>
+<div class="h-px bg-outline-variant/40 flex-1"></div>
+</div>
+<!-- Item 1 -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-3.5 hover:border-outline transition-colors cursor-pointer group active:opacity-90">
+<div class="flex items-start justify-between gap-3">
+<div class="flex-1">
+<h2 class="text-headline-sm font-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
+                Pemerintah bagikan subsidi listrik gratis via tautan WhatsApp
+              </h2>
+<div class="mt-3 flex items-center flex-wrap gap-2">
+<!-- Vonis Badge: Menyesatkan (Coral Red Tone) -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-error-container/40 border border-error/30 text-error font-label-md text-label-md tracking-wide">
+<span class="material-symbols-outlined text-[13px]" data-icon="cancel">cancel</span>
+                  MENYESATKAN
+                </span>
+<span class="text-outline-variant">•</span>
+<span class="text-label-sm font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="schedule">schedule</span>
+                  14 menit lalu
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px] pt-1 transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+</section>
+<!-- Group: Kemarin -->
+<section class="flex flex-col gap-2.5">
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">Kemarin</span>
+<div class="h-px bg-outline-variant/40 flex-1"></div>
+</div>
+<!-- Item 2 -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-3.5 hover:border-outline transition-colors cursor-pointer group active:opacity-90">
+<div class="flex items-start justify-between gap-3">
+<div class="flex-1">
+<h2 class="text-headline-sm font-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
+                WHO rilis panduan pembaruan vaksin flu musiman 2025
+              </h2>
+<div class="mt-3 flex items-center flex-wrap gap-2">
+<!-- Vonis Badge: Didukung Bukti (Forest Green Tone) -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary-fixed/30 border border-tertiary-container/30 text-tertiary font-label-md text-label-md tracking-wide">
+<span class="material-symbols-outlined text-[13px]" data-icon="check_circle">check_circle</span>
+                  DIDUKUNG BUKTI
+                </span>
+<span class="text-outline-variant">•</span>
+<span class="text-label-sm font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="calendar_today">calendar_today</span>
+                  13 Mar 2025
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px] pt-1 transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+<!-- Item 3 -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-3.5 hover:border-outline transition-colors cursor-pointer group active:opacity-90">
+<div class="flex items-start justify-between gap-3">
+<div class="flex-1">
+<h2 class="text-headline-sm font-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
+                Kenaikan tarif PPN 12% ditunda hingga kuartal empat
+              </h2>
+<div class="mt-3 flex items-center flex-wrap gap-2">
+<!-- Vonis Badge: Belum Cukup Bukti (Warm Amber / Secondary Tone) -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary-fixed/40 border border-secondary/30 text-secondary font-label-md text-label-md tracking-wide">
+<span class="material-symbols-outlined text-[13px]" data-icon="help">help</span>
+                  BELUM CUKUP BUKTI
+                </span>
+<span class="text-outline-variant">•</span>
+<span class="text-label-sm font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="calendar_today">calendar_today</span>
+                  13 Mar 2025
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px] pt-1 transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+</section>
+<!-- Group: Pekan Lalu -->
+<section class="flex flex-col gap-2.5">
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">Pekan Lalu</span>
+<div class="h-px bg-outline-variant/40 flex-1"></div>
+</div>
+<!-- Item 4 -->
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-3.5 hover:border-outline transition-colors cursor-pointer group active:opacity-90">
+<div class="flex items-start justify-between gap-3">
+<div class="flex-1">
+<h2 class="text-headline-sm font-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
+                Beredar video erupsi Gunung Merapi dengan klaim kejadian kemarin sore
+              </h2>
+<div class="mt-3 flex items-center flex-wrap gap-2">
+<!-- Vonis Badge: Menyesatkan (Coral Red Tone) -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-error-container/40 border border-error/30 text-error font-label-md text-label-md tracking-wide">
+<span class="material-symbols-outlined text-[13px]" data-icon="cancel">cancel</span>
+                  MENYESATKAN
+                </span>
+<span class="text-outline-variant">•</span>
+<span class="text-label-sm font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="calendar_today">calendar_today</span>
+                  9 Mar 2025
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px] pt-1 transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+</section>
+</main>
+<!-- 6. Bottom Navigation Bar (Executed strictly from Shared Components JSON) -->
+<!-- Screen 4 is HISTORY / RIWAYAT -> 'Riwayat' is active item (index 1) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-md pb-space-md pt-space-xs max-w-md mx-auto bg-surface-container-lowest">
+<!-- Tab 1: Beranda (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="home">home</span>
+<span class="text-label-sm font-label-sm mt-0.5">Beranda</span>
+</a>
+<!-- Tab 2: Riwayat (ACTIVE - matches page intent) -->
+<a class="flex flex-col items-center justify-center text-primary font-semibold py-space-xs hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="history" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="text-label-sm font-label-sm mt-0.5">Riwayat</span>
+</a>
+<!-- Tab 3: Belajar (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="school">school</span>
+<span class="text-label-sm font-label-sm mt-0.5">Belajar</span>
+</a>
+<!-- Tab 4: Profil (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:text-primary transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="person">person</span>
+<span class="text-label-sm font-label-sm mt-0.5">Profil</span>
+</a>
+</nav>
+<!-- 7. Android Gesture Navigation Bar (Standard pill indicator) -->
+<div class="fixed bottom-1 left-0 right-0 max-w-md mx-auto flex justify-center pointer-events-none z-50">
+<div class="w-32 h-1 bg-on-surface/30 rounded-full"></div>
+</div>
+</div>
+</body></html>
