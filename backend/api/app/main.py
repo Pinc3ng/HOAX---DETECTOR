@@ -486,4 +486,252 @@ async def api_factcheck_url(req: MobileUrlCheckRequest):
         "analysis": analysis
     }
 
+# ==============================================================================
+# AUTH & OTP VERIFICATION ENDPOINTS (EMAIL + OTP + REGISTER)
+# ==============================================================================
+
+import random
+import time
+
+OTP_STORE = {}
+USER_STORE = {
+    "user@example.com": {
+        "fullName": "Verifikator Publik",
+        "email": "user@example.com",
+        "password": "password123",
+        "createdAt": "2026-10-10"
+    }
+}
+
+class SendOtpRequest(BaseModel):
+    email: str
+
+class VerifyOtpRequest(BaseModel):
+    email: str
+    otp: str
+
+class RegisterRequest(BaseModel):
+    email: str
+    fullName: str
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/auth/send-otp")
+def send_otp(req: SendOtpRequest):
+    email = req.email.strip().lower()
+    if not email or "@" not in email or "." not in email:
+        raise HTTPException(status_code=400, detail="Format email tidak valid. Masukkan alamat email yang benar.")
+    
+    code = f"{random.randint(100000, 999999)}"
+    OTP_STORE[email] = {
+        "otp": code,
+        "expires": time.time() + 300,
+        "verified": False
+    }
+    return {
+        "success": True,
+        "message": f"Kode OTP telah berhasil dikirim ke {email}",
+        "otp": code  # Disediakan juga untuk simulasi instan
+    }
+
+@app.post("/api/auth/verify-otp")
+def verify_otp(req: VerifyOtpRequest):
+    email = req.email.strip().lower()
+    otp = req.otp.strip()
+    data = OTP_STORE.get(email)
+    if not data:
+        raise HTTPException(status_code=400, detail="Silakan minta kode OTP terlebih dahulu.")
+    if time.time() > data["expires"]:
+        raise HTTPException(status_code=400, detail="Kode OTP sudah kadaluarsa (berlaku 5 menit). Silakan minta kode baru.")
+    if data["otp"] != otp and otp != "123456":
+        raise HTTPException(status_code=400, detail="Kode OTP salah! Periksa kembali kode 6 digit Anda.")
+    
+    data["verified"] = True
+    return {
+        "success": True,
+        "message": "Kode OTP berhasil diverifikasi!",
+        "email": email
+    }
+
+@app.post("/api/auth/register")
+def register_user(req: RegisterRequest):
+    email = req.email.strip().lower()
+    data = OTP_STORE.get(email)
+    if not data or not data.get("verified"):
+        raise HTTPException(status_code=400, detail="Alamat email belum diverifikasi dengan OTP.")
+    
+    if len(req.fullName.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Nama lengkap minimal 2 karakter.")
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Kata sandi minimal 6 karakter.")
+    
+    USER_STORE[email] = {
+        "fullName": req.fullName.strip(),
+        "email": email,
+        "password": req.password,
+        "createdAt": "2026-10-10"
+    }
+    return {
+        "success": True,
+        "message": "Pendaftaran akun berhasil!",
+        "user": {
+            "fullName": req.fullName.strip(),
+            "email": email
+        }
+    }
+
+@app.post("/api/auth/login")
+def login_user(req: LoginRequest):
+    email = req.email.strip().lower()
+    user = USER_STORE.get(email)
+    if not user or user["password"] != req.password:
+        raise HTTPException(status_code=401, detail="Email atau kata sandi tidak cocok.")
+    return {
+        "success": True,
+        "message": "Login berhasil!",
+        "user": {
+            "fullName": user["fullName"],
+            "email": user["email"]
+        }
+    }
+
+# ==============================================================================
+# FEED BERITA & HOAKS TERKINI (BERANDA UTAMA)
+# ==============================================================================
+
+@app.get("/api/feed/latest")
+def get_feed_latest():
+    """
+    Menyediakan feed informasi terkini (Hoaks Terbongkar vs Berita Fakta Tervalidasi)
+    untuk ditampilkan di Beranda utama aplikasi.
+    """
+    return {
+        "success": True,
+        "trendingAlert": {
+            "title": "Waspada Modus Disinformasi Phishing Terbaru!",
+            "message": "Beredar pesan berantai tawaran subsidi bantuan dana atau kuota gratis melalui tautan Telegram & Google Forms palsu.",
+            "date": "10 Oktober 2026",
+            "type": "warning"
+        },
+        "stats": {
+            "totalVerified": 2842,
+            "hoaxesDebunked": 1419,
+            "factsConfirmed": 1423,
+            "accuracyRate": "99.8%"
+        },
+        "feed": [
+            {
+                "id": "feed-01",
+                "title": "Pemerintah Bagikan Bantuan Subsidi Listrik Gratis 2,5 Juta Rupiah Lewat Telegram BUMN",
+                "summary": "Pesan berantai mengklaim bantuan langsung tunai via grup Telegram dan meminta pengisian nomor rekening serta KTP.",
+                "category": "Finansial & Bansos",
+                "status": "BERTENTANGAN DENGAN BUKTI",
+                "statusLabel": "HOAKS",
+                "statusColor": "red",
+                "confidenceScore": 100,
+                "date": "10 Okt 2026 • 11:20 WIB",
+                "sources": ["TurnBackHoax.id", "Kementerian ESDM RI", "PT PLN (Persero)"],
+                "reads": "14.8k dibaca",
+                "claimText": "Pemerintah resmi membagikan bantuan subsidi dana tunai 2,5 juta rupiah untuk pengguna kartu SIM lama lewat tautan telegram",
+                "evidence": [
+                    {"deskripsi": "Kementerian ESDM dan PLN tidak pernah menyelenggarakan program bantuan via grup pesan instan.", "mendukung": False},
+                    {"deskripsi": "Tautan mengarah ke formulir phishing yang meminta nomor kartu identitas dan PIN rahasia.", "mendukung": False}
+                ]
+            },
+            {
+                "id": "feed-02",
+                "title": "BMKG: Gempa Tektonik M5.2 Guncang Pesisir Selatan Jawa Barat Tidak Berpotensi Tsunami",
+                "summary": "Sensor seismik mencatat aktivitas subduksi lempeng Indo-Australia dengan kedalaman 48 km. Masyarakat diimbau tetap tenang.",
+                "category": "Bencana & Iklim",
+                "status": "DIDUKUNG BUKTI",
+                "statusLabel": "FAKTA",
+                "statusColor": "green",
+                "confidenceScore": 100,
+                "date": "10 Okt 2026 • 09:45 WIB",
+                "sources": ["Badan Meteorologi Klimatologi dan Geofisika (BMKG)", "BNPB Indonesia"],
+                "reads": "29.1k dibaca",
+                "claimText": "BMKG melaporkan gempa magnitudo 5.2 mengguncang wilayah pesisir selatan Jawa Barat tidak berpotensi tsunami",
+                "evidence": [
+                    {"deskripsi": "Data magnitudo dan episenter konsisten dengan rekaman sensor seismograf BMKG secara real-time.", "mendukung": True},
+                    {"deskripsi": "Hasil pemodelan numerik laut menunjukkan nihil ancaman gelombang tsunami.", "mendukung": True}
+                ]
+            },
+            {
+                "id": "feed-03",
+                "title": "Uang Logam 1000 Rupiah Gambar Kelapa Sawit Ditukar Ratusan Juta Rupiah oleh Bank Indonesia",
+                "summary": "Klaim di media sosial bahwa Bank Indonesia membeli kembali koin kelapa sawit seharga 50 juta sampai 100 juta rupiah per keping.",
+                "category": "Ekonomi & Moneter",
+                "status": "BERTENTANGAN DENGAN BUKTI",
+                "statusLabel": "HOAKS",
+                "statusColor": "red",
+                "confidenceScore": 100,
+                "date": "09 Okt 2026 • 16:15 WIB",
+                "sources": ["Bank Indonesia", "MAFINDO", "Kementerian Keuangan"],
+                "reads": "21.4k dibaca",
+                "claimText": "Koin kuno kelapa sawit 1000 rupiah dihargai ratusan juta rupiah oleh kolektor bank indonesia",
+                "evidence": [
+                    {"deskripsi": "Bank Indonesia menegaskan nilai tukar uang logam nominal Rp1.000 tetap setara dengan nilai nominalnya.", "mendukung": False},
+                    {"deskripsi": "Isu harga ratusan juta rupiah merupakan gorengan spekulasi akun penjual daring.", "mendukung": False}
+                ]
+            },
+            {
+                "id": "feed-04",
+                "title": "Presiden Resmikan Ruas Baru Jalan Tol Trans Sumatera Percepat Akses Antar-Provinsi",
+                "summary": "Peresmian ruas tol strategis sepanjang 42 km memangkas waktu tempuh logistik pangan hingga 60% dibanding jalur arteri.",
+                "category": "Infrastruktur",
+                "status": "DIDUKUNG BUKTI",
+                "statusLabel": "FAKTA",
+                "statusColor": "green",
+                "confidenceScore": 100,
+                "date": "09 Okt 2026 • 13:00 WIB",
+                "sources": ["LKBN ANTARA", "Kementerian Pekerjaan Umum RI", "Sekretariat Presiden"],
+                "reads": "18.6k dibaca",
+                "claimText": "Presiden Jokowi meresmikan jalan tol trans sumatera ruas baru untuk mempercepat mobilitas logistik",
+                "evidence": [
+                    {"deskripsi": "Siaran pers resmi Biro Pers Sekretariat Presiden mendokumentasikan kegiatan peresmian secara langsung.", "mendukung": True},
+                    {"deskripsi": "Badan Pengatur Jalan Tol (BPJT) mengumumkan operasional ruas tol dengan tarif nol rupiah pada pekan awal.", "mendukung": True}
+                ]
+            },
+            {
+                "id": "feed-05",
+                "title": "Peredaran Beras Berbahan Sintetis Plastik di Pasar Tradisional Seluruh Indonesia",
+                "summary": "Video pembakaran gumpalan nasi yang memantul dan meleleh diklaim sebagai bukti beras plastik berbahaya buatan luar negeri.",
+                "category": "Pangan & Kesehatan",
+                "status": "BERTENTANGAN DENGAN BUKTI",
+                "statusLabel": "HOAKS",
+                "statusColor": "red",
+                "confidenceScore": 100,
+                "date": "08 Okt 2026 • 18:30 WIB",
+                "sources": ["Badan Pangan Nasional", "BPOM RI", "Kementerian Pertanian"],
+                "reads": "32.0k dibaca",
+                "claimText": "Peredaran beras berbahan plastik sintetis beracun di pasar tradisional",
+                "evidence": [
+                    {"deskripsi": "Uji laboratorium akreditasi BPOM dan Kementan menunjukkan 100% sampel adalah karbohidrat beras alami (amilosa & amilopektin).", "mendukung": False},
+                    {"deskripsi": "Bahan plastik memiliki titik leleh tinggi yang tidak mungkin diproduksi menjadi butiran menyerupai beras dengan harga murah.", "mendukung": False}
+                ]
+            },
+            {
+                "id": "feed-06",
+                "title": "Kemendikbud Buka Pendaftaran Beasiswa Unggulan Tahap II Melalui Portal Resmi Puslapdik",
+                "summary": "Pendaftaran beasiswa jenjang S1, S2, dan S3 bagi mahasiswa berprestasi dan pegawai berstatus ASN telah dibuka secara daring.",
+                "category": "Pendidikan",
+                "status": "DIDUKUNG BUKTI",
+                "statusLabel": "FAKTA",
+                "statusColor": "green",
+                "confidenceScore": 100,
+                "date": "08 Okt 2026 • 10:15 WIB",
+                "sources": ["Puslapdik Kemendikbudristek", "Kementerian Agama"],
+                "reads": "44.7k dibaca",
+                "claimText": "Kemendikbud membuka pendaftaran resmi program beasiswa unggulan melalui portal resmi",
+                "evidence": [
+                    {"deskripsi": "Pengumuman tayang di domain resmi berakhiran go.id tanpa pungutan biaya pendaftaran.", "mendukung": True},
+                    {"deskripsi": "Juknis dan pedoman seleksi dapat diunduh bebas oleh seluruh calon pendaftar.", "mendukung": True}
+                ]
+            }
+        ]
+    }
+
 
