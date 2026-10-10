@@ -31,7 +31,7 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val sessionManager = remember { UserSessionManager(context) }
-    val userSession = remember { sessionManager.getCurrentUser() }
+    val userName = remember { sessionManager.getUserName() }
 
     val selectedTheme by viewModel.selectedTheme.collectAsState()
     val aiNotificationEnabled by viewModel.aiNotificationEnabled.collectAsState()
@@ -242,7 +242,7 @@ fun SettingsScreen(
                 }
 
                 // 2. User / Account Card
-                val displayName = userSession?.username ?: "Ahmad Fauzi"
+                val displayName = userName.ifEmpty { "Ahmad Fauzi" }
                 val initials = displayName.split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("").uppercase().ifEmpty { "AF" }
                 val userIdStr = remember(displayName) { "ID-JKT-${(displayName.hashCode() and 0xFFFF).toString().padStart(6, '0')}" }
 

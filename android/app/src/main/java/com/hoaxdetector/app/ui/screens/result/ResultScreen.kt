@@ -453,19 +453,19 @@ private fun ResultContent(
                             )
 
                             // Dynamic Evidence Points
-                            if (analysis.buktiDitemukan.isNotEmpty()) {
+                            if (analysis.bukti.isNotEmpty()) {
                                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    analysis.buktiDitemukan.forEach { bukti ->
+                                    analysis.bukti.forEach { bukti ->
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                                             verticalAlignment = Alignment.Top
                                         ) {
                                             Text(
-                                                text = "•",
-                                                fontSize = 14.sp,
+                                                text = if (bukti.mendukung) "✓" else "✕",
+                                                fontSize = 13.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = StitchPrimaryContainer
+                                                color = if (bukti.mendukung) StitchTertiary else StitchError
                                             )
                                             Text(
                                                 text = bukti.deskripsi,
@@ -792,7 +792,7 @@ private fun ReferenceCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = (sumber.penerbit ?: "Penerbit Terverifikasi").uppercase(),
+                        text = "SUMBER TERVERIFIKASI",
                         fontSize = 10.5.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.6.sp,
@@ -830,7 +830,7 @@ private fun ReferenceCard(
                 }
             }
 
-            if (!sumber.kutipan.isNullOrBlank()) {
+            if (!sumber.keterangan.isNullOrBlank()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -845,7 +845,7 @@ private fun ReferenceCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "“${sumber.kutipan}”",
+                            text = "“${sumber.keterangan}”",
                             fontSize = 12.sp,
                             fontStyle = FontStyle.Italic,
                             color = StitchOnSurfaceVariant,
@@ -863,7 +863,7 @@ private fun ReferenceCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Diterbitkan: ${sumber.tanggalDiterbitkan ?: "Terverifikasi Resmi"}",
+                    text = "Status: Terverifikasi Resmi",
                     fontSize = 11.sp,
                     color = StitchOutline
                 )

@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 // Primary - Deep Teal
 val StitchPrimary = Color(0xFF00333A)
 val StitchPrimaryContainer = Color(0xFF174A52)
+val StitchPrimaryFixed = Color(0xFFBAEBF4)
 val StitchOnPrimary = Color(0xFFFFFFFF)
 val StitchOnPrimaryContainer = Color(0xFF89B9C2)
 
@@ -29,6 +30,7 @@ val StitchSurface = Color(0xFFF8F9FF)
 val StitchSurfaceContainer = Color(0xFFEBEEF6)
 val StitchSurfaceContainerLow = Color(0xFFF1F3FC)
 val StitchSurfaceContainerHigh = Color(0xFFE5E8F0)
+val StitchSurfaceContainerHighest = Color(0xFFDFE2EB)
 val StitchSurfaceContainerLowest = Color(0xFFFFFFFF)
 val StitchSurfaceDim = Color(0xFFD7DAE2)
 
@@ -57,6 +59,13 @@ val StatusRedText = Color(0xFF410002)
 val StatusGray = Color(0xFF70787A)
 val StatusGrayContainer = Color(0xFFEBEEF6)
 val StatusGrayDim = Color(0xFFEBEEF6)
+
+// Stitch Error Tokens
+val StitchError = Color(0xFFBA1A1A)
+val StitchErrorContainer = Color(0xFFFFDAD6)
+val StitchOnError = Color(0xFFFFFFFF)
+val StitchOnErrorContainer = Color(0xFF93000A)
+val StitchSecondaryFixed = Color(0xFFDBE1FF)
 
 // ==============================================================================
 // COMPATIBILITY ALIASES
