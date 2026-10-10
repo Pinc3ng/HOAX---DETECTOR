@@ -2,6 +2,7 @@ package com.hoaxdetector.app.ui.screens.check
 
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
@@ -17,11 +18,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hoaxdetector.app.ui.theme.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun CheckScreen(
@@ -57,405 +62,861 @@ fun CheckScreen(
     val isValid = if (selectedTab == 0) textInput.trim().length >= 20 else urlInput.trim().startsWith("http")
     val isLoading = checkState is CheckState.Loading
 
-    Column(
+    val currentDateStr = remember {
+        SimpleDateFormat("d MMMM yyyy", Locale("id", "ID")).format(Date())
+    }
+
+    val wordCount = remember(currentInput) {
+        if (currentInput.isBlank()) 0 else currentInput.trim().split("\\s+".toRegex()).size
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F7FB))
+            .background(StitchSurface)
     ) {
-        // Top Header matching Figma image 3 (Dark Navy Bar with Back Arrow + Periksa informasi)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(NavyDeep)
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 14.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Text(
-                    text = "Periksa informasi",
-                    fontSize = 20.sp,
-                    color = White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        // Scrollable Body (Light background matching Figma image 3)
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 18.dp)
-        ) {
-            // Tab Selector matching Figma image 3
-            Row(
+        if (isLoading) {
+            // ==========================================
+            // STITCH SCREEN 2: PROSES VERIFIKASI (AUDIT CADENCE)
+            // ==========================================
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFFE2E8F0))
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .fillMaxSize()
+                    .statusBarsPadding()
             ) {
-                // Tab Teks berita
-                Box(
+                // Top Minimal Navigation Bar
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 0) White else Color.Transparent)
-                        .clickable { viewModel.selectedTab.value = 0 }
-                        .padding(vertical = 10.dp),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .border(width = 0.dp, color = Color.Transparent),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Teks berita",
-                        fontSize = 14.sp,
-                        fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium,
-                        color = if (selectedTab == 0) Color(0xFF0F172A) else Color(0xFF64748B)
-                    )
-                }
-
-                // Tab Tautan artikel
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 1) White else Color.Transparent)
-                        .clickable { viewModel.selectedTab.value = 1 }
-                        .padding(vertical = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Tautan artikel",
-                        fontSize = 14.sp,
-                        fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium,
-                        color = if (selectedTab == 1) Color(0xFF0F172A) else Color(0xFF64748B)
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(14.dp))
-
-            // White Input Card matching Figma image 3 with Paste & Clear controls
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = White),
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Action Bar on top of input: Quick Paste and Clear
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    TextButton(
+                        onClick = { viewModel.resetState() },
+                        contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
-                            text = if (selectedTab == 0) "Klaim / Teks" else "URL Berita",
-                            fontSize = 12.sp,
+                            text = "Batal",
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF94A3B8)
+                            color = StitchSecondary
                         )
+                    }
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            // Tombol Tempel dari Clipboard
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFFEFF6FF))
-                                    .clickable {
-                                        val clipText = clipboardManager.getText()?.text
-                                        if (!clipText.isNullOrBlank()) {
-                                            if (selectedTab == 0) {
-                                                viewModel.textInput.value = clipText
-                                            } else {
-                                                viewModel.urlInput.value = clipText
-                                            }
-                                            Toast.makeText(context, "Teks berhasil ditempel!", Toast.LENGTH_SHORT).show()
-                                        } else {
-                                            Toast.makeText(context, "Clipboard kosong", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                                contentAlignment = Alignment.Center
+                    Text(
+                        text = "Proses Verifikasi",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = StitchOnSurface,
+                        letterSpacing = (-0.2).sp
+                    )
+
+                    // Spacer for balanced center title
+                    Spacer(modifier = Modifier.width(36.dp))
+                }
+
+                HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.3f), thickness = 1.dp)
+
+                // Scrollable Editorial Verification Canvas
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // 1. Submitted Claim Card
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.ContentPaste,
-                                        contentDescription = "Tempel",
-                                        tint = ElectricBlue,
-                                        modifier = Modifier.size(13.dp)
+                                        imageVector = Icons.Default.ManageSearch,
+                                        contentDescription = null,
+                                        tint = StitchPrimary,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = "Tempel",
+                                        text = "KLAIM YANG DIPERIKSA",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 0.8.sp,
+                                        color = StitchPrimary
+                                    )
+                                }
+                                Text(
+                                    text = "${if (selectedTab == 0) "Input Teks" else "Tautan URL"} • $currentDateStr",
+                                    fontSize = 11.sp,
+                                    color = StitchOutline
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                text = "“${currentInput.take(220)}${if (currentInput.length > 220) "..." else ""}”",
+                                fontSize = 16.sp,
+                                fontFamily = FontFamily.Serif,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Normal,
+                                color = StitchOnSurface,
+                                lineHeight = 24.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.2f), thickness = 1.dp)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Sumber masukan: ${if (selectedTab == 0) "Pesan Berantai / Naskah" else "Tautan Berita Web"}",
+                                    fontSize = 11.sp,
+                                    color = StitchOutline
+                                )
+                                Text(
+                                    text = "Panjang: $wordCount kata",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = StitchOutline
+                                )
+                            }
+                        }
+                    }
+
+                    // 2. Progress Architecture & Verification Cadence
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "STATUS AUDIT",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 0.8.sp,
+                                        color = StitchOutline
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Kajian Komprehensif Berlangsung",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = StitchPrimary
+                                    )
+                                }
+                                Text(
+                                    text = "78%",
+                                    fontSize = 22.sp,
+                                    fontFamily = FontFamily.Serif,
+                                    fontWeight = FontWeight.Bold,
+                                    color = StitchPrimary
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // Editorial Hairline Progress Meter
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(StitchSurfaceContainerHighest)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.78f)
+                                        .fillMaxHeight()
+                                        .clip(RoundedCornerShape(3.dp))
+                                        .background(StitchPrimaryContainer)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Memindai pola semantik Natural Language Inference (NLI) dan keterkaitan basis data kredibel secara bertahap.",
+                                fontSize = 12.sp,
+                                color = StitchOnSurfaceVariant,
+                                lineHeight = 17.sp
+                            )
+                        }
+                    }
+
+                    // 3. Step-by-Step Audit Log
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            // Step 1: Checked
+                            AuditStepRow(
+                                title = "Memahami intisari dan entitas klaim",
+                                status = "Selesai",
+                                statusColor = StitchTertiary,
+                                subtitle = "Entitas diidentifikasi: Verifikasi sintaksis & semantik NLI.",
+                                isDone = true
+                            )
+
+                            HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.2f), thickness = 1.dp)
+
+                            // Step 2: Checked
+                            AuditStepRow(
+                                title = "Mencari rekam jejak pada pangkalan data Cek Fakta",
+                                status = "Selesai",
+                                statusColor = StitchTertiary,
+                                subtitle = "Pencocokan TurnBackHoax, Kominfo & media kredibel.",
+                                isDone = true
+                            )
+
+                            HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.2f), thickness = 1.dp)
+
+                            // Step 3: Active / Sedang Berjalan
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(StitchSurfaceContainerLow.copy(alpha = 0.6f))
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .padding(top = 2.dp)
+                                        .size(18.dp),
+                                    color = StitchPrimaryContainer,
+                                    strokeWidth = 2.dp
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Menganalisis bukti dan rujukan berita resmi...",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = StitchPrimary
+                                        )
+                                        Text(
+                                            text = "BERJALAN",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.5.sp,
+                                            color = StitchSecondary
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Membandingkan data silang dengan model premis-hipotesis NLI.",
                                         fontSize = 11.5.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = ElectricBlue
+                                        color = StitchOnSurfaceVariant
                                     )
                                 }
                             }
 
-                            // Tombol Bersihkan jika ada teks
-                            if (currentInput.isNotEmpty()) {
+                            HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.2f), thickness = 1.dp)
+
+                            // Step 4: Pending / Menunggu
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(Color(0xFFFEE2E2))
-                                        .clickable {
-                                            if (selectedTab == 0) viewModel.clearText()
-                                            else viewModel.clearUrl()
-                                        }
-                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                        .padding(top = 2.dp)
+                                        .size(18.dp)
+                                        .clip(CircleShape)
+                                        .background(StitchSurfaceContainerHigh)
+                                        .border(1.dp, StitchOutlineVariant, CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(5.dp)
+                                            .clip(CircleShape)
+                                            .background(StitchOutline)
+                                    )
+                                }
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Menyusun kesimpulan & tingkat keandalan sumber",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = StitchOnSurface.copy(alpha = 0.7f)
+                                        )
+                                        Text(
+                                            text = "MENUNGGU",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = StitchOutline
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "Hapus",
+                                        text = "Vonis fakta definitif akan dirilis setelah seluruh rujukan teruji.",
                                         fontSize = 11.5.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFDC2626)
+                                        color = StitchOutline
                                     )
                                 }
                             }
                         }
                     }
 
-                    Spacer(Modifier.height(10.dp))
-
-                    BasicTextField(
-                        value = if (selectedTab == 0) textInput else urlInput,
-                        onValueChange = {
-                            if (selectedTab == 0) viewModel.textInput.value = it
-                            else viewModel.urlInput.value = it
-                        },
+                    // 4. Calming Notice Box
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(min = 180.dp, max = 260.dp),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color(0xFF0F172A),
-                            fontSize = 14.5.sp,
-                            lineHeight = 22.sp
-                        ),
-                        decorationBox = { innerTextField ->
-                            Box {
-                                if (currentInput.isEmpty()) {
-                                    Text(
-                                        text = if (selectedTab == 0)
-                                            "Tempel teks berita, klaim viral, atau pesan berantai di sini..."
-                                        else
-                                            "Tempel tautan / link berita di sini (contoh: https://kompas.com/...)",
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            color = Color(0xFF94A3B8),
-                                            fontSize = 14.sp,
-                                            lineHeight = 21.sp
-                                        )
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        }
-                    )
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(StitchSurfaceContainerLow)
+                            .border(1.dp, StitchOutlineVariant.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.VerifiedUser,
+                            contentDescription = null,
+                            tint = StitchPrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "Kami membandingkan informasi dengan konsensus media kredibel dan pangkalan data verifikasi independen secara transparan.",
+                            fontSize = 12.sp,
+                            color = StitchOnSurfaceVariant,
+                            lineHeight = 17.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(30.dp))
                 }
             }
+        } else {
+            // ==========================================
+            // STITCH SCREEN 2: INPUT / SUBMIT STATE
+            // ==========================================
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+            ) {
+                // Top Header: Back + Title
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = StitchPrimary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
 
-            Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Verifikasi Fakta",
+                        fontSize = 18.sp,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = StitchPrimary
+                    )
 
-            // Subtitle counter matching Figma image 3
+                    Spacer(modifier = Modifier.size(36.dp))
+                }
+
+                HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.3f), thickness = 1.dp)
+
+                // Main Form Content
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 18.dp, vertical = 16.dp)
+                ) {
+                    // Header prompt
+                    Text(
+                        text = "Masukkan Materi Verifikasi",
+                        fontSize = 20.sp,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = StitchOnSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Gunakan mesin NLI untuk mencocokkan premis berita terhadap pangkalan data fakta teruji.",
+                        fontSize = 13.sp,
+                        color = StitchOnSurfaceVariant,
+                        lineHeight = 19.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    // Input Card with Tabs
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Tab Selector
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                            ) {
+                                // Tab Teks
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { viewModel.selectedTab.value = 0 }
+                                        .padding(bottom = 6.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Article,
+                                            contentDescription = null,
+                                            tint = if (selectedTab == 0) StitchPrimaryContainer else StitchOutline,
+                                            modifier = Modifier.size(17.dp)
+                                        )
+                                        Text(
+                                            text = "Teks berita",
+                                            fontSize = 13.5.sp,
+                                            fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (selectedTab == 0) StitchPrimaryContainer else StitchOutline
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    if (selectedTab == 0) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.8f)
+                                                .height(2.5.dp)
+                                                .background(StitchPrimaryContainer, RoundedCornerShape(2.dp))
+                                        )
+                                    }
+                                }
+
+                                // Tab Link
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { viewModel.selectedTab.value = 1 }
+                                        .padding(bottom = 6.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Link,
+                                            contentDescription = null,
+                                            tint = if (selectedTab == 1) StitchPrimaryContainer else StitchOutline,
+                                            modifier = Modifier.size(17.dp)
+                                        )
+                                        Text(
+                                            text = "Tautan artikel",
+                                            fontSize = 13.5.sp,
+                                            fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (selectedTab == 1) StitchPrimaryContainer else StitchOutline
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    if (selectedTab == 1) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.8f)
+                                                .height(2.5.dp)
+                                                .background(StitchPrimaryContainer, RoundedCornerShape(2.dp))
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Action Bar inside card: Quick Paste & Clear
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (selectedTab == 0) "Isi teks atau naskah klaim:" else "URL alamat artikel:",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = StitchOutline
+                                )
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    // Paste button
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(StitchSecondaryFixed.copy(alpha = 0.5f))
+                                            .clickable {
+                                                val clipText = clipboardManager.getText()?.text
+                                                if (!clipText.isNullOrBlank()) {
+                                                    if (selectedTab == 0) {
+                                                        viewModel.textInput.value = clipText
+                                                    } else {
+                                                        viewModel.urlInput.value = clipText
+                                                    }
+                                                    Toast.makeText(context, "Teks berhasil ditempel", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(context, "Papan klip kosong", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ContentPaste,
+                                                contentDescription = null,
+                                                tint = StitchSecondary,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                            Text(
+                                                text = "Tempel",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = StitchSecondary
+                                            )
+                                        }
+                                    }
+
+                                    if (currentInput.isNotEmpty()) {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(StitchErrorContainer.copy(alpha = 0.5f))
+                                                .clickable {
+                                                    if (selectedTab == 0) viewModel.clearText()
+                                                    else viewModel.clearUrl()
+                                                }
+                                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        ) {
+                                            Text(
+                                                text = "Hapus",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = StitchError
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            // Text area
+                            BasicTextField(
+                                value = if (selectedTab == 0) textInput else urlInput,
+                                onValueChange = {
+                                    if (selectedTab == 0) viewModel.textInput.value = it
+                                    else viewModel.urlInput.value = it
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 150.dp, max = 220.dp),
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                    color = StitchOnSurface,
+                                    fontSize = 14.5.sp,
+                                    lineHeight = 22.sp
+                                ),
+                                decorationBox = { innerTextField ->
+                                    Box {
+                                        if (currentInput.isEmpty()) {
+                                            Text(
+                                                text = if (selectedTab == 0)
+                                                    "Tempel klaim viral, narasi berantai, atau isi warta di sini..."
+                                                else
+                                                    "Tempel alamat link artikel berita resmi (contoh: https://antaranews.com/...)",
+                                                fontSize = 14.sp,
+                                                color = StitchOutline.copy(alpha = 0.7f),
+                                                lineHeight = 21.sp
+                                            )
+                                        }
+                                        innerTextField()
+                                    }
+                                }
+                            )
+
+                            HorizontalDivider(
+                                color = StitchOutlineVariant.copy(alpha = 0.3f),
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 6.dp)
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (selectedTab == 0) {
+                                        if (currentInput.isNotEmpty() && currentInput.length < 20)
+                                            "Kurang ${20 - currentInput.length} karakter lagi"
+                                        else
+                                            "Minimal 20 karakter untuk akurasi optimal"
+                                    } else {
+                                        "Format diawali https://"
+                                    },
+                                    fontSize = 11.sp,
+                                    color = if (currentInput.isNotEmpty() && !isValid) StitchError else StitchOutline
+                                )
+                                Text(
+                                    text = "${currentInput.length} karakter",
+                                    fontSize = 11.sp,
+                                    color = StitchOutline
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Instant Sample Chips
+                    Text(
+                        text = "Contoh klaim cepat untuk pengujian:",
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = StitchOutline
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        QuickSampleChip(
+                            label = "⚡ Subsidi Listrik Telegram (Hoaks)",
+                            onClick = {
+                                viewModel.selectedTab.value = 0
+                                viewModel.textInput.value =
+                                    "Pemerintah resmi membagikan bantuan dana subsidi listrik tunai 2,5 juta rupiah untuk pengguna kartu SIM lama lewat tautan grup Telegram resmi BUMN."
+                            }
+                        )
+                        QuickSampleChip(
+                            label = "⚡ Hoaks Vaksin 5G Chip",
+                            onClick = {
+                                viewModel.selectedTab.value = 0
+                                viewModel.textInput.value =
+                                    "Vaksin COVID-19 dilaporkan mengandung microchip 5G yang dapat mengontrol pikiran manusia secara langsung dari menara satelit."
+                            }
+                        )
+                        QuickSampleChip(
+                            label = "✓ Fakta BMKG Gempa Terkini",
+                            onClick = {
+                                viewModel.selectedTab.value = 0
+                                viewModel.textInput.value =
+                                    "BMKG merilis informasi gempa bumi tektonik berkekuatan magnitudo 5,2 di wilayah pesisir selatan Jawa Barat tidak berpotensi tsunami."
+                            }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Notice box
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(StitchSurfaceContainerLow)
+                            .border(1.dp, StitchOutlineVariant.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = StitchPrimaryContainer,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "Data diverifikasi menggunakan model NLI internal tanpa mengirimkan naskah pribadi ke layanan pihak ketiga komersial.",
+                            fontSize = 11.5.sp,
+                            color = StitchOnSurfaceVariant,
+                            lineHeight = 16.sp
+                        )
+                    }
+
+                    // Error notice if any
+                    if (checkState is CheckState.Error) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(StitchErrorContainer.copy(alpha = 0.4f))
+                                .border(1.dp, StitchError.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ErrorOutline,
+                                contentDescription = null,
+                                tint = StitchError,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = (checkState as CheckState.Error).message,
+                                fontSize = 12.sp,
+                                color = StitchError,
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Submit Button: Stitch Editorial Style
+                    Button(
+                        onClick = {
+                            if (selectedTab == 0) viewModel.checkText() else viewModel.checkUrl()
+                        },
+                        enabled = isValid,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = StitchPrimaryContainer,
+                            disabledContainerColor = StitchOutlineVariant
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.VerifiedUser,
+                            contentDescription = null,
+                            tint = StitchOnPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Verifikasi Fakta Sekarang",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = StitchOnPrimary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(30.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AuditStepRow(
+    title: String,
+    status: String,
+    statusColor: Color,
+    subtitle: String,
+    isDone: Boolean
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 2.dp)
+                .size(18.dp)
+                .clip(CircleShape)
+                .background(StitchTertiaryFixed),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = StitchTertiary,
+                modifier = Modifier.size(13.dp)
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (selectedTab == 0) {
-                        if (currentInput.isNotEmpty() && currentInput.length < 20)
-                            "Kurang ${20 - currentInput.length} karakter lagi"
-                        else
-                            "Minimal 20 karakter untuk analisis akurat"
-                    } else {
-                        "Pastikan format URL diawali http:// atau https://"
-                    },
-                    fontSize = 11.5.sp,
-                    color = if (currentInput.isNotEmpty() && !isValid) Color(0xFFE11D48) else Color(0xFF64748B)
+                    text = title,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = StitchOnSurface
                 )
                 Text(
-                    text = "${currentInput.length} karakter",
-                    fontSize = 11.5.sp,
-                    color = Color(0xFF64748B)
+                    text = status.uppercase(),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = statusColor
                 )
             }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Contoh Klaim Cepat (1-Tap Test Chips)
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Coba contoh klaim instan:",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF64748B)
+                text = subtitle,
+                fontSize = 11.5.sp,
+                color = StitchOutline
             )
-            Spacer(Modifier.height(6.dp))
-
-            if (selectedTab == 0) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    QuickSampleChip(
-                        label = "⚡ Hoax Vaksin 5G",
-                        onClick = {
-                            viewModel.textInput.value =
-                                "Klaim: Vaksin COVID-19 mengandung chip mikroskopik 5G yang dapat memprogram dan mengendalikan pikiran manusia dari satelit jarak jauh."
-                        }
-                    )
-                    QuickSampleChip(
-                        label = "⚡ Hoax Rebusan Garam",
-                        onClick = {
-                            viewModel.textInput.value =
-                                "Klaim: Menghirup uap air garam rebusan panas selama 5 menit setiap pagi terbukti membunuh seluruh virus di saluran pernapasan secara instan."
-                        }
-                    )
-                    QuickSampleChip(
-                        label = "✓ Fakta Riset Kopi",
-                        onClick = {
-                            viewModel.textInput.value =
-                                "Artikel: Riset kesehatan menunjukkan konsumsi kopi hitam tanpa gula dalam batas wajar dapat meningkatkan fokus dan menurunkan risiko penyakit kardiovaskular."
-                        }
-                    )
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    QuickSampleChip(
-                        label = "🔗 TurnBackHoax.id",
-                        onClick = {
-                            viewModel.urlInput.value = "https://turnbackhoax.id/2023/11/klaim-bawang-putih-sembuhkan-virus"
-                        }
-                    )
-                    QuickSampleChip(
-                        label = "🔗 Kompas Cek Fakta",
-                        onClick = {
-                            viewModel.urlInput.value = "https://www.kompas.com/cekfakta/bawang-putih-hoax"
-                        }
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Info Security Banner matching Figma image 3
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFFE0F2FE))
-                    .padding(14.dp),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.VerifiedUser,
-                    contentDescription = null,
-                    tint = Color(0xFF0284C7),
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = "Data yang Anda masukkan diproses secara aman. Kami tidak menyimpan informasi pribadi atau membagikannya dengan pihak ketiga.",
-                    fontSize = 12.sp,
-                    lineHeight = 17.sp,
-                    color = Color(0xFF0369A1)
-                )
-            }
-
-            Spacer(Modifier.height(20.dp))
-
-            // Error display if any
-            if (checkState is CheckState.Error) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFEE2E2))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ErrorOutline,
-                            contentDescription = null,
-                            tint = Color(0xFFDC2626),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = (checkState as CheckState.Error).message,
-                            color = Color(0xFFDC2626),
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp
-                        )
-                    }
-                }
-            }
-
-            // Bottom Action Button: Analisis dengan AI matching Figma image 3
-            Button(
-                onClick = {
-                    if (selectedTab == 0) viewModel.checkText() else viewModel.checkUrl()
-                },
-                enabled = isValid && !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1E88E5),
-                    disabledContainerColor = Color(0xFF93C5FD)
-                )
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = White,
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        text = "Menganalisis dengan Algoritma NLI (Python)...",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = White
-                    )
-                } else {
-                    Text(
-                        text = "Analisis Berbasis NLI",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = White
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(32.dp))
         }
     }
 }
@@ -467,16 +928,17 @@ private fun QuickSampleChip(
 ) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFFE2E8F0))
+            .clip(RoundedCornerShape(6.dp))
+            .background(StitchSurfaceContainerLowest)
+            .border(1.dp, StitchOutlineVariant.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Text(
             text = label,
-            fontSize = 12.sp,
+            fontSize = 11.5.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF334155)
+            color = StitchPrimary
         )
     }
 }

@@ -1,47 +1,48 @@
 package com.hoaxdetector.app.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = ElectricBlue,
-    onPrimary = White,
-    primaryContainer = ElectricBlueDark,
-    onPrimaryContainer = TextPrimary,
-    secondary = StatusGreen,
-    onSecondary = White,
-    tertiary = StatusYellow,
-    background = NavyDeep,
-    onBackground = TextPrimary,
-    surface = NavyMedium,
-    onSurface = TextPrimary,
-    surfaceVariant = NavyLight,
-    onSurfaceVariant = TextSecondary,
+private val EditorialColorScheme = lightColorScheme(
+    primary = StitchPrimary,
+    onPrimary = StitchOnPrimary,
+    primaryContainer = StitchPrimaryContainer,
+    onPrimaryContainer = StitchOnPrimaryContainer,
+    secondary = StitchSecondary,
+    onSecondary = StitchOnSecondary,
+    secondaryContainer = StitchSecondaryContainer,
+    onSecondaryContainer = StitchOnSecondaryContainer,
+    tertiary = StitchTertiary,
+    background = StitchSurface,
+    onBackground = StitchOnSurface,
+    surface = StitchSurfaceContainerLowest,
+    onSurface = StitchOnSurface,
+    surfaceVariant = StitchSurfaceContainer,
+    onSurfaceVariant = StitchOnSurfaceVariant,
     error = StatusRed,
     onError = White,
-    outline = BorderColor,
-    outlineVariant = DividerColor
+    outline = StitchOutline,
+    outlineVariant = StitchOutlineVariant
 )
 
 @Composable
 fun HoaxDetectorTheme(
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorScheme
+    val colorScheme = EditorialColorScheme
     val view = LocalView.current
 
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = NavyDeep.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            window.statusBarColor = StitchSurface.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
         }
     }
 
@@ -51,3 +52,4 @@ fun HoaxDetectorTheme(
         content = content
     )
 }
+

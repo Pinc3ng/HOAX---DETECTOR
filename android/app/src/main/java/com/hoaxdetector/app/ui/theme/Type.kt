@@ -9,10 +9,11 @@ import androidx.compose.ui.unit.sp
 
 // Use system default fonts (you can replace with custom fonts later)
 val AppFontFamily = FontFamily.Default
+val EditorialSerif = FontFamily.Serif
 
 val AppTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 40.sp,
@@ -20,7 +21,7 @@ val AppTypography = Typography(
         color = TextPrimary
     ),
     displayMedium = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 36.sp,
@@ -28,24 +29,24 @@ val AppTypography = Typography(
         color = TextPrimary
     ),
     headlineLarge = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
+        fontSize = 26.sp,
         lineHeight = 32.sp,
         color = TextPrimary
     ),
     headlineMedium = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
+        fontSize = 22.sp,
         lineHeight = 28.sp,
         color = TextPrimary
     ),
     headlineSmall = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp,
-        lineHeight = 26.sp,
+        lineHeight = 24.sp,
         color = TextPrimary
     ),
     titleLarge = TextStyle(

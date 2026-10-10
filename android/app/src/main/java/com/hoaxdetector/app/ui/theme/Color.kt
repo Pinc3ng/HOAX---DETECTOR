@@ -2,37 +2,82 @@ package com.hoaxdetector.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary - Navy Deep
-val NavyDeep = Color(0xFF0A1628)
-val NavyMedium = Color(0xFF0D1F3C)
-val NavyLight = Color(0xFF152845)
-val NavySurface = Color(0xFF1A3055)
+// ==============================================================================
+// STITCH REDESIGN EDITORIAL PALETTE (HOAX DETECTOR)
+// ==============================================================================
 
-// Accent - Electric Blue
-val ElectricBlue = Color(0xFF1E90FF)
-val ElectricBlueLight = Color(0xFF4DABFF)
-val ElectricBlueDark = Color(0xFF0070D4)
-val ElectricBlueDim = Color(0xFF1E90FF).copy(alpha = 0.15f)
+// Primary - Deep Teal
+val StitchPrimary = Color(0xFF00333A)
+val StitchPrimaryContainer = Color(0xFF174A52)
+val StitchOnPrimary = Color(0xFFFFFFFF)
+val StitchOnPrimaryContainer = Color(0xFF89B9C2)
+
+// Secondary - Royal Blue
+val StitchSecondary = Color(0xFF3159B8)
+val StitchSecondaryContainer = Color(0xFF769AFD)
+val StitchOnSecondary = Color(0xFFFFFFFF)
+val StitchOnSecondaryContainer = Color(0xFF002F7F)
+
+// Tertiary - Forest Green
+val StitchTertiary = Color(0xFF003522)
+val StitchTertiaryContainer = Color(0xFF004E33)
+val StitchTertiaryFixed = Color(0xFFA6F3CA)
+val StitchOnTertiaryFixed = Color(0xFF002113)
+
+// Surfaces & Backgrounds
+val StitchSurface = Color(0xFFF8F9FF)
+val StitchSurfaceContainer = Color(0xFFEBEEF6)
+val StitchSurfaceContainerLow = Color(0xFFF1F3FC)
+val StitchSurfaceContainerHigh = Color(0xFFE5E8F0)
+val StitchSurfaceContainerLowest = Color(0xFFFFFFFF)
+val StitchSurfaceDim = Color(0xFFD7DAE2)
+
+// Content & Text
+val StitchOnSurface = Color(0xFF181C22)
+val StitchOnSurfaceVariant = Color(0xFF40484A)
+val StitchOutline = Color(0xFF70787A)
+val StitchOutlineVariant = Color(0xFFC0C8CA)
 
 // Status Colors
-val StatusGreen = Color(0xFF00D97E)      // Didukung Bukti
-val StatusGreenDim = Color(0xFF00D97E).copy(alpha = 0.15f)
-val StatusYellow = Color(0xFFFFB800)     // Menyesatkan
-val StatusYellowDim = Color(0xFFFFB800).copy(alpha = 0.15f)
-val StatusRed = Color(0xFFFF3B5C)        // Bertentangan dengan Bukti
-val StatusRedDim = Color(0xFFFF3B5C).copy(alpha = 0.15f)
-val StatusGray = Color(0xFF8A9BB3)       // Belum Dapat Diverifikasi
-val StatusGrayDim = Color(0xFF8A9BB3).copy(alpha = 0.15f)
+val StatusGreen = Color(0xFF005236)
+val StatusGreenContainer = Color(0xFFA6F3CA)
+val StatusGreenDim = Color(0xFFA6F3CA)
+val StatusGreenText = Color(0xFF002113)
 
-// Text
-val TextPrimary = Color(0xFFEEF2F8)
-val TextSecondary = Color(0xFF8A9BB3)
-val TextMuted = Color(0xFF4A5D78)
+val StatusYellow = Color(0xFF8C5000)
+val StatusYellowContainer = Color(0xFFFFDDB3)
+val StatusYellowDim = Color(0xFFFFDDB3)
+val StatusYellowText = Color(0xFF2C1600)
 
-// Divider & Border
-val BorderColor = Color(0xFF1E3A5A)
-val DividerColor = Color(0xFF152845)
+val StatusRed = Color(0xFFBA1A1A)
+val StatusRedContainer = Color(0xFFFFDAD6)
+val StatusRedDim = Color(0xFFFFDAD6)
+val StatusRedText = Color(0xFF410002)
 
-// White & Black
+val StatusGray = Color(0xFF70787A)
+val StatusGrayContainer = Color(0xFFEBEEF6)
+val StatusGrayDim = Color(0xFFEBEEF6)
+
+// ==============================================================================
+// COMPATIBILITY ALIASES
+// ==============================================================================
+val NavyDeep = StitchSurface
+val NavyMedium = StitchSurfaceContainerLowest
+val NavyLight = StitchSurfaceContainerLowest
+val NavySurface = StitchSurfaceContainerLow
+
+val ElectricBlue = StitchPrimaryContainer
+val ElectricBlueLight = StitchSecondary
+val ElectricBlueDark = StitchPrimary
+val ElectricBlueDim = StitchSecondaryContainer.copy(alpha = 0.2f)
+
+val TextPrimary = StitchOnSurface
+val TextSecondary = StitchOnSurfaceVariant
+val TextMuted = StitchOutline
+
+val BorderColor = StitchOutlineVariant.copy(alpha = 0.5f)
+val DividerColor = StitchOutlineVariant.copy(alpha = 0.3f)
+
 val White = Color(0xFFFFFFFF)
 val Black = Color(0xFF000000)
+

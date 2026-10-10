@@ -2,6 +2,7 @@ package com.hoaxdetector.app.ui.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
@@ -12,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.*
@@ -74,7 +76,7 @@ fun HoaxDetectorNavGraph() {
     ) || currentRoute?.startsWith("check") == true)
 
     Scaffold(
-        containerColor = NavyDeep,
+        containerColor = StitchSurface,
         bottomBar = {
             if (showBottomBar) {
                 HoaxDetectorBottomBar(
@@ -222,47 +224,54 @@ fun HoaxDetectorBottomBar(
     currentRoute: String?,
     onNavigate: (String) -> Unit
 ) {
-    NavigationBar(
-        containerColor = NavyMedium,
-        contentColor = TextPrimary,
-        tonalElevation = 0.dp
+    Surface(
+        color = StitchSurfaceContainerLowest,
+        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.35f)),
+        shadowElevation = 6.dp
     ) {
-        bottomNavItems.forEach { screen ->
-            val selected = if (screen == Screen.Check) {
-                currentRoute?.startsWith("check") == true
-            } else {
-                currentRoute == screen.route
-            }
+        NavigationBar(
+            containerColor = StitchSurfaceContainerLowest,
+            contentColor = StitchOnSurface,
+            tonalElevation = 0.dp
+        ) {
+            bottomNavItems.forEach { screen ->
+                val selected = if (screen == Screen.Check) {
+                    currentRoute?.startsWith("check") == true
+                } else {
+                    currentRoute == screen.route
+                }
 
-            val targetRoute = if (screen == Screen.Check) {
-                Screen.Check.createRoute(0)
-            } else {
-                screen.route
-            }
+                val targetRoute = if (screen == Screen.Check) {
+                    Screen.Check.createRoute(0)
+                } else {
+                    screen.route
+                }
 
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        imageVector = screen.icon,
-                        contentDescription = screen.label
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            imageVector = screen.icon,
+                            contentDescription = screen.label
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = screen.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    selected = selected,
+                    onClick = { onNavigate(targetRoute) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = StitchPrimaryContainer,
+                        selectedTextColor = StitchPrimary,
+                        unselectedIconColor = StitchOutline,
+                        unselectedTextColor = StitchOutline,
+                        indicatorColor = StitchPrimaryFixed.copy(alpha = 0.35f)
                     )
-                },
-                label = {
-                    Text(
-                        text = screen.label,
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                },
-                selected = selected,
-                onClick = { onNavigate(targetRoute) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = ElectricBlue,
-                    selectedTextColor = ElectricBlue,
-                    unselectedIconColor = TextSecondary,
-                    unselectedTextColor = TextSecondary,
-                    indicatorColor = ElectricBlueDim
                 )
-            )
+            }
         }
     }
 }

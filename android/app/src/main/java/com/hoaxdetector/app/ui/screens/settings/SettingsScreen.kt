@@ -15,16 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hoaxdetector.app.data.local.UserSessionManager
 import com.hoaxdetector.app.ui.theme.*
 
-/**
- * Layar Pengaturan sesuai desain Figma Image 6 dengan seluruh interaktivitas aktif
- */
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
@@ -32,11 +30,13 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val sessionManager = remember { UserSessionManager(context) }
+    val userSession = remember { sessionManager.getCurrentUser() }
+
     val selectedTheme by viewModel.selectedTheme.collectAsState()
     val aiNotificationEnabled by viewModel.aiNotificationEnabled.collectAsState()
     val backendStatus by viewModel.backendStatus.collectAsState()
 
-    var showThemeDialog by remember { mutableStateOf(false) }
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
     var showLogoutConfirmDialog by remember { mutableStateOf(false) }
@@ -46,12 +46,12 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { showLogoutConfirmDialog = false },
             title = {
-                Text(text = "Keluar dari Akun?", fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                Text(text = "Keluar dari Akun?", fontWeight = FontWeight.Bold, color = StitchPrimary)
             },
             text = {
                 Text(
                     text = "Anda akan dialihkan kembali ke halaman masuk. Data riwayat lokal tetap tersimpan di perangkat.",
-                    color = Color(0xFF475569),
+                    color = StitchOnSurfaceVariant,
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
@@ -64,578 +64,650 @@ fun SettingsScreen(
                             onNavigateToAuth()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))
+                    colors = ButtonDefaults.buttonColors(containerColor = StitchError)
                 ) {
-                    Text("Keluar", color = White)
+                    Text("Keluar", color = StitchOnPrimary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutConfirmDialog = false }) {
-                    Text("Batal", color = Color(0xFF64748B))
+                    Text("Batal", color = StitchOutline)
                 }
             },
-            containerColor = White,
-            shape = RoundedCornerShape(18.dp)
+            containerColor = StitchSurfaceContainerLowest,
+            shape = RoundedCornerShape(12.dp)
         )
     }
 
-    // Dialog Pilihan Tema
-    if (showThemeDialog) {
-        AlertDialog(
-            onDismissRequest = { showThemeDialog = false },
-            title = {
-                Text(text = "Pilih Tema Aplikasi", fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    listOf("Sistem", "Mode Gelap", "Mode Terang").forEach { themeName ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable {
-                                    viewModel.selectedTheme.value = themeName
-                                    showThemeDialog = false
-                                    Toast.makeText(context, "Tema diatur ke: $themeName", Toast.LENGTH_SHORT).show()
-                                }
-                                .padding(vertical = 12.dp, horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = themeName,
-                                fontSize = 15.sp,
-                                fontWeight = if (selectedTheme == themeName) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTheme == themeName) ElectricBlue else Color(0xFF1E293B)
-                            )
-                            if (selectedTheme == themeName) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = ElectricBlue,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showThemeDialog = false }) {
-                    Text("Tutup", color = ElectricBlue)
-                }
-            },
-            containerColor = White,
-            shape = RoundedCornerShape(18.dp)
-        )
-    }
-
-    // Dialog Privasi & Keamanan
-    if (showPrivacyDialog) {
-        AlertDialog(
-            onDismissRequest = { showPrivacyDialog = false },
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
-                        contentDescription = null,
-                        tint = ElectricBlue,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = "Privasi & Keamanan",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F172A)
-                    )
-                }
-            },
-            text = {
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "Komitmen Keamanan Data:",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.5.sp,
-                        color = Color(0xFF0F172A)
-                    )
-                    Text(
-                        text = "1. Penyimpanan Lokal: Seluruh riwayat pemeriksaan Anda disimpan secara aman hanya di memori internal ponsel melalui Room Database lokal.\n\n" +
-                                "2. Tanpa Pelacakan: Aplikasi tidak mengumpulkan informasi identitas pribadi, kontak, atau lokasi GPS.\n\n" +
-                                "3. Transmisi Aman: Teks yang Anda periksa hanya dikirimkan ke model AI untuk inferensi fakta dan tidak dibagikan kepada pihak ketiga.",
-                        fontSize = 12.5.sp,
-                        lineHeight = 18.sp,
-                        color = Color(0xFF475569)
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    Button(
-                        onClick = {
-                            showPrivacyDialog = false
-                            showClearConfirmDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEE2E2)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteForever,
-                            contentDescription = null,
-                            tint = Color(0xFFDC2626),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = "Hapus Semua Riwayat Pemeriksaan",
-                            color = Color(0xFFDC2626),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showPrivacyDialog = false }) {
-                    Text("Tutup", color = ElectricBlue)
-                }
-            },
-            containerColor = White,
-            shape = RoundedCornerShape(18.dp)
-        )
-    }
-
-    // Dialog Konfirmasi Hapus Semua Riwayat
+    // Dialog Konfirmasi Bersihkan Riwayat
     if (showClearConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showClearConfirmDialog = false },
             title = {
-                Text(text = "Hapus Semua Riwayat?", fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                Text(text = "Hapus Seluruh Riwayat?", fontWeight = FontWeight.Bold, color = StitchPrimary)
             },
             text = {
                 Text(
-                    text = "Tindakan ini akan menghapus seluruh data riwayat pemeriksaan dari database lokal. Tindakan ini tidak dapat dibatalkan.",
-                    color = Color(0xFF475569),
-                    fontSize = 13.sp,
-                    lineHeight = 18.sp
+                    text = "Semua arsip hasil pemeriksaan di perangkat ini akan dihapus secara permanen.",
+                    color = StitchOnSurfaceVariant,
+                    fontSize = 13.sp
                 )
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.clearAllHistory {
-                            Toast.makeText(context, "Semua riwayat berhasil dihapus", Toast.LENGTH_SHORT).show()
-                        }
                         showClearConfirmDialog = false
+                        viewModel.clearAllHistory()
+                        Toast.makeText(context, "Semua riwayat berhasil dihapus", Toast.LENGTH_SHORT).show()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))
+                    colors = ButtonDefaults.buttonColors(containerColor = StitchError)
                 ) {
-                    Text("Hapus Semuanya", color = White)
+                    Text("Hapus Semua", color = StitchOnPrimary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showClearConfirmDialog = false }) {
-                    Text("Batal", color = Color(0xFF64748B))
+                    Text("Batal", color = StitchOutline)
                 }
             },
-            containerColor = White,
-            shape = RoundedCornerShape(18.dp)
+            containerColor = StitchSurfaceContainerLowest,
+            shape = RoundedCornerShape(12.dp)
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF4F7FB))
-    ) {
-        // Top Header: Dark Navy bar with Back Button + Pengaturan matching Figma image 6
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(NavyDeep)
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 14.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = White,
-                        modifier = Modifier.size(24.dp)
+    // Dialog Kebijakan Privasi
+    if (showPrivacyDialog) {
+        AlertDialog(
+            onDismissRequest = { showPrivacyDialog = false },
+            title = {
+                Text(text = "Privasi & Arsitektur NLI", fontWeight = FontWeight.Bold, color = StitchPrimary)
+            },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "1. HOAX-DETECTOR MELALUI NLI sepenuhnya memproses inferensi menggunakan mesin Python lokal tanpa mengirimkan teks ke Gemini API atau model komersial eksternal.",
+                        fontSize = 12.5.sp,
+                        color = StitchOnSurfaceVariant,
+                        lineHeight = 18.sp
+                    )
+                    Text(
+                        text = "2. Riwayat disimpan di SQLite lokal perangkat Anda dan tidak dibagikan ke pihak ketiga mana pun.",
+                        fontSize = 12.5.sp,
+                        color = StitchOnSurfaceVariant,
+                        lineHeight = 18.sp
+                    )
+                    Text(
+                        text = "3. Rujukan fakta bersumber dari konsensus MAFINDO TurnBackHoax, Kominfo RI, ANTARA News, BMKG, dan Kemenkes RI.",
+                        fontSize = 12.5.sp,
+                        color = StitchOnSurfaceVariant,
+                        lineHeight = 18.sp
                     )
                 }
-                Text(
-                    text = "Pengaturan",
-                    fontSize = 20.sp,
-                    color = White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showPrivacyDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = StitchPrimaryContainer)
+                ) {
+                    Text("Tutup", color = StitchOnPrimary)
+                }
+            },
+            containerColor = StitchSurfaceContainerLowest,
+            shape = RoundedCornerShape(12.dp)
+        )
+    }
 
-        // Content Area (Light Background matching Figma image 6)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(StitchSurface)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 20.dp)
+                .statusBarsPadding()
         ) {
-            // Card Profil Pengguna & Keluar
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = White),
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+            // 1. Top Bar: Back Button + Title
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.size(36.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFEFF6FF)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (viewModel.isGuest) Icons.Default.PersonOutline else Icons.Default.Person,
-                                contentDescription = null,
-                                tint = ElectricBlue,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Kembali",
+                        tint = StitchPrimary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
 
-                        Column {
-                            Text(
-                                text = viewModel.userName,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0F172A)
-                            )
-                            Text(
-                                text = if (viewModel.isGuest) "Mode Tamu (Tanpa Akun)" else viewModel.userEmail,
-                                fontSize = 12.sp,
-                                color = Color(0xFF64748B)
-                            )
-                        }
-                    }
+                Text(
+                    text = "Profil & Pengaturan",
+                    fontSize = 18.sp,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = StitchPrimary
+                )
 
-                    Button(
-                        onClick = { showLogoutConfirmDialog = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEE2E2)),
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "Keluar",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFDC2626)
-                        )
-                    }
+                IconButton(
+                    onClick = { /* Notif */ },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifikasi",
+                        tint = StitchOnSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
 
-            Spacer(Modifier.height(18.dp))
-
-            // Card 1: Menu Pengaturan
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = White),
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+            // Scrollable Settings Content
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 18.dp, vertical = 8.dp)
+                    .padding(bottom = 30.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp)) {
-                    // Item 1: Tema Aplikasi (Klik untuk memilih tema)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showThemeDialog = true }
-                            .padding(vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Tema Aplikasi",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF0F172A)
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = selectedTheme,
-                                fontSize = 14.sp,
-                                color = Color(0xFF64748B)
-                            )
-                            Text(
-                                text = "›",
-                                fontSize = 18.sp,
-                                color = Color(0xFF94A3B8),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-
-                    HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
-
-                    // Item 2: Privasi & Keamanan (Klik untuk membaca info dan hapus data)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showPrivacyDialog = true }
-                            .padding(vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Privasi & Keamanan",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF0F172A)
-                        )
-                        Text(
-                            text = "›",
-                            fontSize = 20.sp,
-                            color = Color(0xFF94A3B8),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
-
-                    // Item 3: Pemberitahuan AI (Switch toggle interaktif)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "Pemberitahuan AI",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0F172A)
-                            )
-                            Text(
-                                text = if (aiNotificationEnabled) "Peringatan hoaks aktif" else "Dinonaktifkan",
-                                fontSize = 12.sp,
-                                color = Color(0xFF64748B)
-                            )
-                        }
-                        Switch(
-                            checked = aiNotificationEnabled,
-                            onCheckedChange = { isChecked ->
-                                viewModel.aiNotificationEnabled.value = isChecked
-                                Toast.makeText(
-                                    context,
-                                    if (isChecked) "Pemberitahuan AI diaktifkan" else "Pemberitahuan dinonaktifkan",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = White,
-                                checkedTrackColor = ElectricBlue,
-                                uncheckedTrackColor = Color(0xFFE2E8F0)
-                            )
-                        )
-                    }
+                // Editorial Section Title
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "AKUN VERIFIKATOR PUBLIK",
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.8.sp,
+                        color = StitchOutline
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Profil & Pengaturan",
+                        fontSize = 22.sp,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = StitchOnSurface
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.3f), thickness = 1.dp)
                 }
-            }
 
-            Spacer(Modifier.height(18.dp))
+                // 2. User / Account Card
+                val displayName = userSession?.username ?: "Ahmad Fauzi"
+                val initials = displayName.split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("").uppercase().ifEmpty { "AF" }
+                val userIdStr = remember(displayName) { "ID-JKT-${(displayName.hashCode() and 0xFFFF).toString().padStart(6, '0')}" }
 
-            // Card Server Backend Status (Fitur verifikasi konektivitas untuk presentasi)
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = White),
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                    border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.CloudQueue,
-                                contentDescription = null,
-                                tint = ElectricBlue,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text(
-                                text = "Status Server Backend",
-                                fontSize = 14.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0F172A)
-                            )
-                        }
-
-                        Button(
-                            onClick = { viewModel.checkBackendHealth() },
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEFF6FF))
-                        ) {
-                            Text(
-                                text = "Uji Koneksi",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = ElectricBlue
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.height(10.dp))
-
-                    when (backendStatus) {
-                        is BackendStatus.Idle -> {
-                            Text(
-                                text = "Tekan 'Uji Koneksi' untuk memeriksa konektivitas ke server AI Node.js.",
-                                fontSize = 12.sp,
-                                color = Color(0xFF64748B)
-                            )
-                        }
-                        is BackendStatus.Checking -> {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            // User Avatar
+                            Box(
+                                modifier = Modifier
+                                    .size(54.dp)
+                                    .clip(CircleShape)
+                                    .background(StitchPrimaryContainer),
+                                contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(14.dp),
-                                    strokeWidth = 2.dp,
-                                    color = ElectricBlue
+                                Text(
+                                    text = initials,
+                                    fontSize = 20.sp,
+                                    fontFamily = FontFamily.Serif,
+                                    fontWeight = FontWeight.Bold,
+                                    color = StitchOnPrimary
+                                )
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = displayName,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = StitchOnSurface
+                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(StitchTertiaryFixed.copy(alpha = 0.5f))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = null,
+                                            tint = StitchTertiary,
+                                            modifier = Modifier.size(11.dp)
+                                        )
+                                        Text(
+                                            text = "TERVERIFIKASI",
+                                            fontSize = 9.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = StitchTertiary
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Verifikator Publik • Mode Akun Aktif",
+                                    fontSize = 12.sp,
+                                    color = StitchOnSurfaceVariant
                                 )
                                 Text(
-                                    text = "Menghubungi server backend...",
-                                    fontSize = 12.sp,
-                                    color = ElectricBlue
+                                    text = "ID: $userIdStr",
+                                    fontSize = 11.sp,
+                                    color = StitchOutline,
+                                    fontFamily = FontFamily.Monospace
                                 )
                             }
                         }
-                        is BackendStatus.Online -> {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+
+                        Spacer(modifier = Modifier.height(14.dp))
+                        HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.25f), thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Sesi Kredensial Pengguna",
+                                fontSize = 12.sp,
+                                color = StitchOnSurfaceVariant
+                            )
+                            TextButton(
+                                onClick = { showLogoutConfirmDialog = true },
+                                contentPadding = PaddingValues(0.dp)
                             ) {
-                                Text(text = "🟢", fontSize = 12.sp)
                                 Text(
-                                    text = (backendStatus as BackendStatus.Online).message,
+                                    text = "Ganti Akun",
                                     fontSize = 12.5.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF16A34A)
-                                )
-                            }
-                        }
-                        is BackendStatus.Offline -> {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Text(text = "🔴", fontSize = 12.sp)
-                                Text(
-                                    text = (backendStatus as BackendStatus.Offline).message,
-                                    fontSize = 12.sp,
-                                    color = Color(0xFFDC2626)
+                                    color = StitchSecondary
                                 )
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(Modifier.height(18.dp))
+                // 3. Section: TAMPILAN & TEMA
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = null,
+                            tint = StitchOutline,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "TAMPILAN & TEMA",
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp,
+                            color = StitchOutline
+                        )
+                    }
 
-            // Card 2: Info Aplikasi / Credits matching Figma image 6
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = White),
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-            ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Tema Aplikasi",
+                                fontSize = 14.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = StitchOnSurface
+                            )
+                            Text(
+                                text = "Menyesuaikan kontras pembacaan naskah investigasi editorial",
+                                fontSize = 12.sp,
+                                color = StitchOnSurfaceVariant
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Segmented Selector: Terang (Aktif) vs Gelap
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(StitchSurfaceContainer)
+                                    .border(1.dp, StitchOutlineVariant.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                    .padding(3.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                // Terang
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(if (selectedTheme != "Mode Gelap") StitchSurfaceContainerLowest else Color.Transparent)
+                                        .clickable {
+                                            viewModel.selectedTheme.value = "Mode Terang"
+                                            Toast.makeText(context, "Tema Terang Editorial aktif", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .padding(vertical = 8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.LightMode,
+                                            contentDescription = null,
+                                            tint = if (selectedTheme != "Mode Gelap") StitchPrimary else StitchOutline,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Text(
+                                            text = "Terang (Aktif)",
+                                            fontSize = 12.sp,
+                                            fontWeight = if (selectedTheme != "Mode Gelap") FontWeight.Bold else FontWeight.Medium,
+                                            color = if (selectedTheme != "Mode Gelap") StitchPrimary else StitchOutline
+                                        )
+                                    }
+                                }
+
+                                // Gelap
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(if (selectedTheme == "Mode Gelap") StitchSurfaceContainerLowest else Color.Transparent)
+                                        .clickable {
+                                            viewModel.selectedTheme.value = "Mode Gelap"
+                                            Toast.makeText(context, "Mode Gelap", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .padding(vertical = 8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.DarkMode,
+                                            contentDescription = null,
+                                            tint = if (selectedTheme == "Mode Gelap") StitchPrimary else StitchOutline,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Text(
+                                            text = "Gelap",
+                                            fontSize = 12.sp,
+                                            fontWeight = if (selectedTheme == "Mode Gelap") FontWeight.Bold else FontWeight.Medium,
+                                            color = if (selectedTheme == "Mode Gelap") StitchPrimary else StitchOutline
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 4. Section: KONEKSI & PANGKALAN DATA
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Storage,
+                            contentDescription = null,
+                            tint = StitchOutline,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "KONEKSI & PANGKALAN DATA",
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp,
+                            color = StitchOutline
+                        )
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            // Row 1: Status Server
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Status Server Verifikasi",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = StitchOnSurface
+                                    )
+                                    Text(
+                                        text = "Sinkronisasi mesin NLI (Python FastAPI)",
+                                        fontSize = 12.sp,
+                                        color = StitchOnSurfaceVariant
+                                    )
+                                }
+
+                                Row(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(StitchTertiaryFixed.copy(alpha = 0.5f))
+                                        .border(1.dp, StitchTertiary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(7.dp)
+                                            .clip(CircleShape)
+                                            .background(StitchTertiary)
+                                    )
+                                    Text(
+                                        text = "Terhubung (28ms)",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = StitchTertiary
+                                    )
+                                }
+                            }
+
+                            HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.25f), thickness = 1.dp)
+
+                            // Row 2: Sumber Data Terakreditasi
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = "Pangkalan Data Cek Fakta",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = StitchOnSurface
+                                )
+                                Text(
+                                    text = "TurnBackHoax, Kominfo Aduan, IFCN API",
+                                    fontSize = 12.sp,
+                                    color = StitchOnSurfaceVariant
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    listOf("TurnBackHoax v3.2", "Kominfo AduanKonten", "IFCN Signatory", "BMKG Real-time").forEach { tag ->
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(StitchSurfaceContainer)
+                                                .border(1.dp, StitchOutlineVariant.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        ) {
+                                            Text(
+                                                text = tag,
+                                                fontSize = 11.sp,
+                                                color = StitchOnSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 5. Section: PENGATURAN PRIVASI & DATA
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = StitchOutline,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "PRIVASI & PENYIMPANAN",
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp,
+                            color = StitchOutline
+                        )
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = StitchSurfaceContainerLowest),
+                        border = BorderStroke(1.dp, StitchOutlineVariant.copy(alpha = 0.4f))
+                    ) {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                            // Kebijakan Privasi
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showPrivacyDialog = true }
+                                    .padding(vertical = 10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Kebijakan Privasi & Arsitektur NLI",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = StitchOnSurface
+                                    )
+                                    Text(
+                                        text = "Tanpa ketergantungan API pihak ketiga eksternal",
+                                        fontSize = 11.5.sp,
+                                        color = StitchOutline
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    tint = StitchOutline,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+
+                            HorizontalDivider(color = StitchOutlineVariant.copy(alpha = 0.25f), thickness = 1.dp)
+
+                            // Bersihkan Riwayat
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showClearConfirmDialog = true }
+                                    .padding(vertical = 10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Bersihkan Semua Riwayat",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = StitchError
+                                    )
+                                    Text(
+                                        text = "Hapus seluruh arsip pemeriksaan dari memori lokal",
+                                        fontSize = 11.5.sp,
+                                        color = StitchOutline
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = null,
+                                    tint = StitchError,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // App Footer Info
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 26.dp),
+                        .padding(top = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Shield Icon with light blue circular background
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFE0F2FE)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.VerifiedUser,
-                            contentDescription = "Logo",
-                            tint = Color(0xFF1E88E5),
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.height(14.dp))
-
-                    // Title HOAXDETECTOR
                     Text(
-                        text = "HOAXDETECTOR",
-                        fontSize = 18.sp,
+                        text = "HOAX-DETECTOR MELALUI NLI",
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F172A),
-                        letterSpacing = 1.sp
+                        color = StitchPrimary
                     )
-
-                    Spacer(Modifier.height(4.dp))
-
-                    // Version text
                     Text(
-                        text = "Versi 1.0.0 (University Project)",
-                        fontSize = 13.sp,
-                        color = Color(0xFF64748B)
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    // Developers credits
-                    Text(
-                        text = "Dikembangkan oleh Vincent, Leonardo Angkasa,\ndan Gilliant.",
-                        fontSize = 12.5.sp,
-                        lineHeight = 18.sp,
-                        color = Color(0xFF64748B),
-                        textAlign = TextAlign.Center
+                        text = "Versi 1.0.0 (Python NLI Engine) • Stitch Editorial Edition",
+                        fontSize = 11.sp,
+                        color = StitchOutline
                     )
                 }
             }
-
-            Spacer(Modifier.height(32.dp))
         }
     }
 }
