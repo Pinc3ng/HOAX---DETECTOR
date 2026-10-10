@@ -45,3 +45,4 @@ build/
 # OS / Editor
 Thumbs.db
 .vscode/
+backend/python_embed/

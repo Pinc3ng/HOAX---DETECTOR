@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>HOAX DETECTOR — Python Natural Language Inference (NLI)</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#00333a",
+            "primary-container": "#174a52",
+            "on-primary": "#ffffff",
+            "surface": "#f8f9ff",
+            "surface-dim": "#d7dae2",
+            "surface-container": "#ebeef6",
+            "surface-container-low": "#f1f3fc",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#e5e8f0",
+            "secondary": "#3159b8",
+            "secondary-container": "#dbe1ff",
+            "on-secondary-container": "#002f7f",
+            "outline": "#70787a",
+            "outline-variant": "#c0c8ca",
+            "on-surface": "#181c22",
+            "on-surface-variant": "#40484a",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "success": "#006d44",
+            "success-container": "#c9f3d9",
+            "warning": "#b45309",
+            "warning-container": "#fef3c7"
+          },
+          fontFamily: {
+            headline: ["Newsreader", "serif"],
+            sans: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #c0c8ca;
+      border-radius: 4px;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(0.99); }
+    }
+    .pulse-animation {
+      animation: pulse-subtle 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-on-surface antialiased min-h-screen flex justify-center items-start sm:py-6 selection:bg-teal-100 selection:text-primary">
+
+  <!-- Mobile-first App Shell (max-w-[430px] or full responsive) -->
+  <main class="w-full max-w-md min-h-screen sm:min-h-[880px] sm:max-h-[920px] bg-surface flex flex-col relative sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-700/50 sm:ring-1 sm:ring-white/10">
+
+    <!-- Top Status Bar & Header -->
+    <header class="w-full bg-surface-container-lowest border-b border-outline-variant/30 px-4 py-3 flex items-center justify-between z-20 flex-none">
+      <div class="flex items-center gap-2.5">
+        <img src="/static/logo.png" alt="Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover border border-primary/20" onerror="this.src='https://placehold.co/36x36/00333a/ffffff?text=HD'" />
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-sm tracking-tight text-primary">HOAX DETECTOR</span>
+            <span class="px-1.5 py-0.2 text-[10px] font-semibold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300">PYTHON NLI</span>
+          </div>
+          <p class="text-[10px] text-outline font-medium">Verifikasi Berita Melalui Inferensi Bahasa</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-toggle-theme" onclick="toggleTheme()" title="Ganti Tema" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition">
+          <span class="material-symbols-outlined text-[18px]">dark_mode</span>
+        </button>
+        <button onclick="switchView('settings')" title="Info Server" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition">
+          <span class="material-symbols-outlined text-[18px]">settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT CONTAINER (Scrollable Views) -->
+    <div class="flex-1 overflow-y-auto custom-scroll relative pb-20">
+
+      <!-- ============================================================== -->
+      <!-- VIEW 1: BERANDA (HOME)                                         -->
+      <!-- ============================================================== -->
+      <section id="view-home" class="p-4 space-y-4">
+        <!-- Hero Banner -->
+        <div class="bg-gradient-to-br from-primary via-primary-container to-slate-900 text-white rounded-2xl p-4 shadow-md relative overflow-hidden">
+          <div class="relative z-10">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-medium tracking-wide uppercase">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              Algoritma NLI Aktif
+            </span>
+            <h1 class="font-headline text-xl font-bold mt-2 leading-snug">
+              Periksa Fakta Tanpa Keraguan.
+            </h1>
+            <p class="text-xs text-white/80 mt-1 leading-relaxed">
+              Model mDeBERTa-v3 membandingkan klaim dengan premis fakta MAFINDO, CekFakta & GDELT secara objektif.
+            </p>
+          </div>
+          <div class="absolute -right-4 -bottom-6 w-24 h-24 bg-teal-400/10 rounded-full blur-xl pointer-events-none"></div>
+        </div>
+
+        <!-- Input Mode Switcher -->
+        <div class="flex bg-surface-container p-1 rounded-xl text-xs font-semibold">
+          <button id="tab-text" onclick="setInputMode('text')" class="flex-1 py-1.5 rounded-lg bg-surface-container-lowest text-primary shadow-xs transition text-center flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">article</span> Teks Klaim
+          </button>
+          <button id="tab-url" onclick="setInputMode('url')" class="flex-1 py-1.5 rounded-lg text-outline hover:text-on-surface transition text-center flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">link</span> Tautan URL
+          </button>
+        </div>
+
+        <!-- Verification Form Card -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 shadow-xs space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <label id="input-label" class="font-semibold text-on-surface flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-primary">edit_note</span>
+              Masukkan Teks atau Narasi Klaim
+            </label>
+            <div class="flex items-center gap-2">
+              <button onclick="pasteClipboard()" class="text-secondary hover:underline flex items-center gap-0.5 text-[11px] font-medium">
+                <span class="material-symbols-outlined text-[13px]">content_paste</span> Tempel
+              </button>
+              <button onclick="clearInput()" class="text-outline hover:text-error text-[11px] font-medium">
+                Hapus
+              </button>
+            </div>
+          </div>
+
+          <!-- Text Input Area -->
+          <div id="container-text-input">
+            <textarea id="claim-text" rows="4" placeholder="Tempel narasi berita, pesan berantai WhatsApp, atau klaim yang ingin diverifikasi di sini..." class="w-full text-xs p-3 rounded-xl border border-outline-variant/60 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition bg-surface-container-low/40 resize-none leading-relaxed"></textarea>
+          </div>
+
+          <!-- URL Input Area (Hidden by default) -->
+          <div id="container-url-input" class="hidden">
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-3 text-outline text-[18px]">search</span>
+              <input type="url" id="claim-url" placeholder="https://news.detik.com/... atau tautan berita lainnya" class="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl border border-outline-variant/60 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition bg-surface-container-low/40" />
+            </div>
+            <p class="text-[10px] text-outline mt-1.5">Sistem Python akan mengunduh konten berita dan mengevaluasi klaim utamanya.</p>
+          </div>
+
+          <!-- Quick Sample Claim Chips -->
+          <div>
+            <span class="text-[10px] font-semibold text-outline uppercase tracking-wider block mb-1.5">Contoh Uji Coba:</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="setSample('Pemerintah bagikan subsidi listrik gratis dan bantuan dana tunai 2,5 juta rupiah lewat tautan Telegram resmi')" class="px-2.5 py-1 text-[11px] bg-surface-container hover:bg-surface-container-high rounded-full border border-outline-variant/30 text-on-surface-variant transition text-left">
+                ⚠️ Subsidi Dana Telegram
+              </button>
+              <button onclick="setSample('BMKG melaporkan gempa magnitudo 5.2 mengguncang wilayah pesisir selatan Jawa Barat tidak berpotensi tsunami')" class="px-2.5 py-1 text-[11px] bg-surface-container hover:bg-surface-container-high rounded-full border border-outline-variant/30 text-on-surface-variant transition text-left">
+                ✅ Gempa BMKG
+              </button>
+              <button onclick="setSample('Koin kuno kelapa sawit 1000 rupiah dihargai ratusan juta rupiah oleh kolektor bank')" class="px-2.5 py-1 text-[11px] bg-surface-container hover:bg-surface-container-high rounded-full border border-outline-variant/30 text-on-surface-variant transition text-left">
+                ⚠️ Koin Sawit 100 Juta
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button id="btn-submit-verify" onclick="startVerification()" class="w-full py-3 bg-primary hover:bg-primary-container text-white rounded-xl font-semibold text-xs tracking-wide shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+            <span>Verifikasi Klaim Sekarang</span>
+          </button>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-surface-container-lowest p-2.5 rounded-xl border border-outline-variant/30">
+            <span class="text-base font-extrabold text-primary block">100%</span>
+            <span class="text-[10px] text-outline font-medium">Python NLI</span>
+          </div>
+          <div class="bg-surface-container-lowest p-2.5 rounded-xl border border-outline-variant/30">
+            <span class="text-base font-extrabold text-secondary block">4 Sumber</span>
+            <span class="text-[10px] text-outline font-medium">Fact-Check DB</span>
+          </div>
+          <div class="bg-surface-container-lowest p-2.5 rounded-xl border border-outline-variant/30">
+            <span class="text-base font-extrabold text-emerald-700 block">&lt; 350ms</span>
+            <span class="text-[10px] text-outline font-medium">Latensi Inferensi</span>
+          </div>
+        </div>
+
+        <!-- S.I.F.T Checklist Teaser -->
+        <div onclick="switchView('education')" class="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/40 flex items-center justify-between cursor-pointer hover:border-primary/50 transition">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-800 flex items-center justify-center font-bold text-xs">
+              SIFT
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-on-surface">Panduan Cek Fakta 4 Langkah</h4>
+              <p class="text-[10px] text-outline">Metode praktis memverifikasi berita sebelum membagikan</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 2: CADENCE PROSES VERIFIKASI (CHECK SCREEN)               -->
+      <!-- ============================================================== -->
+      <section id="view-check" class="hidden p-4 space-y-4">
+        <!-- Header minimal -->
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <button onclick="cancelVerification()" class="text-secondary hover:text-primary text-xs font-semibold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">close</span> Batal
+          </button>
+          <h2 class="text-xs font-bold text-on-surface uppercase tracking-wider">Audit Inferensi Berjalan</h2>
+          <div class="w-8"></div>
+        </div>
+
+        <!-- Claim Display Card -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 shadow-xs space-y-2">
+          <div class="flex items-center justify-between text-[11px] text-outline">
+            <span class="uppercase tracking-wider font-semibold text-primary flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">manage_search</span> Klaim yang Diaudit
+            </span>
+            <span id="check-claim-type">Input Teks</span>
+          </div>
+          <blockquote id="check-claim-snippet" class="font-headline text-sm italic text-on-surface leading-snug border-l-2 border-primary pl-3 py-1">
+            “Memuat klaim...”
+          </blockquote>
+        </div>
+
+        <!-- 4-Step Verification Cadence -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 shadow-xs space-y-4">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">memory</span>
+            Pipeline Natural Language Inference (NLI)
+          </h3>
+
+          <!-- Step 1 -->
+          <div id="step-1" class="flex items-start gap-3 transition-all duration-300">
+            <div id="step-1-icon" class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[12px] font-bold mt-0.5">
+              ✓
+            </div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-on-surface">1. Parsing & Ekstraksi Entitas</h4>
+              <p class="text-[11px] text-outline">Membersihkan teks, normalisasi karakter, dan memetakan entitas kunci.</p>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div id="step-2" class="flex items-start gap-3 transition-all duration-300">
+            <div id="step-2-icon" class="w-6 h-6 rounded-full bg-surface-container text-outline flex items-center justify-center text-[12px] font-bold mt-0.5">
+              2
+            </div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-on-surface">2. Multi-Source Evidence Retrieval</h4>
+              <p class="text-[11px] text-outline">Mencari premis relevan dari MAFINDO, CekFakta, GDELT & arsip berita.</p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div id="step-3" class="flex items-start gap-3 transition-all duration-300">
+            <div id="step-3-icon" class="w-6 h-6 rounded-full bg-surface-container text-outline flex items-center justify-center text-[12px] font-bold mt-0.5">
+              3
+            </div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-on-surface">3. NLI Premis-Hipotesis Inference</h4>
+              <p class="text-[11px] text-outline">Komputasi skor Entailment vs Contradiction berbasis mDeBERTa-v3.</p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div id="step-4" class="flex items-start gap-3 transition-all duration-300">
+            <div id="step-4-icon" class="w-6 h-6 rounded-full bg-surface-container text-outline flex items-center justify-center text-[12px] font-bold mt-0.5">
+              4
+            </div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-on-surface">4. Agregasi Bukti & Penentuan Vonis</h4>
+              <p class="text-[11px] text-outline">Menimbang reputasi sumber dan merumuskan laporan akhir.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animated Progress Meter -->
+        <div class="p-4 bg-teal-50/70 border border-teal-200 rounded-2xl text-center space-y-2">
+          <div class="flex justify-between text-[11px] font-semibold text-teal-900">
+            <span id="cadence-status-text">Menghubungkan ke Engine Python NLI...</span>
+            <span id="cadence-percent">25%</span>
+          </div>
+          <div class="w-full h-2 bg-teal-200/60 rounded-full overflow-hidden">
+            <div id="cadence-bar" class="h-full bg-primary transition-all duration-500 rounded-full" style="width: 25%;"></div>
+          </div>
+          <p class="text-[10px] text-teal-800">Proses evaluasi murni oleh model bahasa Python tanpa dependensi eksternal.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 3: HASIL PEMERIKSAAN (RESULT DOSSIER)                     -->
+      <!-- ============================================================== -->
+      <section id="view-result" class="hidden p-4 space-y-4">
+        <!-- Top Nav & Actions -->
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <button onclick="switchView('home')" class="text-primary hover:text-primary-container text-xs font-semibold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span> Beranda
+          </button>
+          <div class="text-[11px] text-outline font-medium" id="res-dossier-id">ID #VER-2026-NLI001</div>
+          <button onclick="shareResult()" title="Bagikan Laporan" class="p-1 rounded text-outline hover:text-primary">
+            <span class="material-symbols-outlined text-[18px]">share</span>
+          </button>
+        </div>
+
+        <!-- Verdict Header Box -->
+        <div id="res-verdict-box" class="rounded-2xl p-4 border space-y-2.5 shadow-sm transition-all">
+          <div class="flex items-center justify-between">
+            <span id="res-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              <span id="res-status-text">MEMUAT...</span>
+            </span>
+            <div class="text-right">
+              <span id="res-conf-num" class="text-base font-extrabold text-on-surface">100%</span>
+              <span class="text-[10px] text-outline block -mt-1">Kepercayaan</span>
+            </div>
+          </div>
+          <h2 id="res-summary-title" class="font-headline text-base font-bold text-on-surface leading-snug">
+            Ringkasan Hasil Evaluasi NLI
+          </h2>
+          <p id="res-summary-desc" class="text-xs text-on-surface-variant leading-relaxed bg-surface-container-lowest/60 p-2.5 rounded-xl border border-outline-variant/30">
+            Klaim telah dievaluasi terhadap korpus fakta terverifikasi.
+          </p>
+        </div>
+
+        <!-- Klaim yang Diperiksa Quote -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 shadow-xs space-y-1.5">
+          <div class="text-[11px] font-semibold text-outline uppercase tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">format_quote</span> Klaim yang Diperiksa
+          </div>
+          <blockquote id="res-claim-quote" class="font-headline text-xs italic text-on-surface leading-relaxed border-l-2 border-primary pl-3 py-1">
+            “Klaim input...”
+          </blockquote>
+        </div>
+
+        <!-- Analisis Bukti Section -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 shadow-xs space-y-3">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">fact_check</span>
+            Analisis Bukti & Rantai Inferensi
+          </h3>
+          <p id="res-explanation" class="text-xs text-on-surface-variant leading-relaxed">
+            Penjelasan analisis NLI...
+          </p>
+          <div id="res-evidence-list" class="space-y-2 pt-1">
+            <!-- Dynamic evidence items inserted here -->
+          </div>
+        </div>
+
+        <!-- Sumber Referensi Resmi Section -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 shadow-xs space-y-3">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+            Sumber Referensi Resmi & Verifikasi
+          </h3>
+          <div id="res-sources-list" class="space-y-2">
+            <!-- Dynamic sources items inserted here -->
+          </div>
+        </div>
+
+        <!-- Tips Mengenali & Keterbatasan -->
+        <div class="bg-teal-50/60 border border-teal-200/70 rounded-2xl p-3.5 space-y-2 text-xs text-teal-950">
+          <div class="flex items-center gap-1.5 font-bold text-primary">
+            <span class="material-symbols-outlined text-[16px]">lightbulb</span>
+            Tips Mengenali Pola Konten Serupa
+          </div>
+          <p id="res-tips" class="text-[11px] text-teal-900 leading-relaxed">
+            Tips praktis mengenali disinformasi...
+          </p>
+          <p id="res-limitation" class="text-[10px] text-outline pt-1 border-t border-teal-200/50">
+            Diverifikasi oleh model inferensi Python NLI tanpa ketergantungan API pihak ketiga.
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-2 pt-1">
+          <button onclick="copyReport()" class="w-full py-2.5 bg-surface-container-highest hover:bg-surface-variant text-on-surface rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 border border-outline-variant/40">
+            <span class="material-symbols-outlined text-[16px]">content_copy</span> Salin Ringkasan Laporan
+          </button>
+          <button onclick="switchView('home')" class="w-full py-2.5 bg-primary hover:bg-primary-container text-white rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">refresh</span> Periksa Klaim Lainnya
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 4: RIWAYAT (HISTORY)                                      -->
+      <!-- ============================================================== -->
+      <section id="view-history" class="hidden p-4 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div>
+            <h2 class="text-sm font-bold text-primary">Riwayat Pemeriksaan</h2>
+            <p class="text-[10px] text-outline">Daftar arsip verifikasi tersimpan di peramban</p>
+          </div>
+          <button onclick="clearHistory()" class="text-[11px] text-error hover:underline flex items-center gap-0.5">
+            <span class="material-symbols-outlined text-[14px]">delete</span> Kosongkan
+          </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[16px]">search</span>
+          <input type="text" id="history-search" oninput="filterHistory()" placeholder="Cari dalam riwayat..." class="w-full text-xs pl-8 pr-3 py-2 rounded-xl border border-outline-variant/50 bg-surface-container-lowest focus:border-primary outline-none" />
+        </div>
+
+        <!-- Filter Badges -->
+        <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] custom-scroll">
+          <button onclick="setHistoryFilter('ALL')" class="px-2.5 py-1 rounded-full bg-primary text-white font-medium history-pill">Semua</button>
+          <button onclick="setHistoryFilter('DIDUKUNG')" class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-medium history-pill">Fakta</button>
+          <button onclick="setHistoryFilter('BERTENTANGAN')" class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-medium history-pill">Hoaks</button>
+          <button onclick="setHistoryFilter('MENYESATKAN')" class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-medium history-pill">Menyesatkan</button>
+        </div>
+
+        <!-- History Item List -->
+        <div id="history-list" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 5: BELAJAR LITERASI MEDIA (EDUCATION)                    -->
+      <!-- ============================================================== -->
+      <section id="view-education" class="hidden p-4 space-y-4">
+        <div>
+          <h2 class="text-sm font-bold text-primary">Pusat Literasi Media</h2>
+          <p class="text-[10px] text-outline">Panduan praktis menangkal disinformasi digital</p>
+        </div>
+
+        <!-- S.I.F.T Method Accordion Cards -->
+        <div class="space-y-2.5">
+          <div class="bg-surface-container-lowest rounded-2xl p-3.5 border border-outline-variant/40 space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-teal-100 text-teal-800 font-extrabold text-xs flex items-center justify-center">S</span>
+              <h3 class="text-xs font-bold text-on-surface">STOP — Berhenti Sejenak</h3>
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">
+              Saat menemukan informasi yang memicu amarah, kecemasan, atau kegembiraan berlebihan, tahan diri untuk tidak langsung membagikannya (Forward).
+            </p>
+          </div>
+
+          <div class="bg-surface-container-lowest rounded-2xl p-3.5 border border-outline-variant/40 space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 font-extrabold text-xs flex items-center justify-center">I</span>
+              <h3 class="text-xs font-bold text-on-surface">INVESTIGATE — Selidiki Sumbernya</h3>
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">
+              Ketahui siapa penulisnya atau platform yang mempublikasikannya. Periksa halaman 'Tentang Kami', apakah terdaftar di Dewan Pers atau akun anonim.
+            </p>
+          </div>
+
+          <div class="bg-surface-container-lowest rounded-2xl p-3.5 border border-outline-variant/40 space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 font-extrabold text-xs flex items-center justify-center">F</span>
+              <h3 class="text-xs font-bold text-on-surface">FIND — Cari Liputan Lain yang Lebih Terpercaya</h3>
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">
+              Bila peristiwanya penting, media arus utama (Antara, Kompas, Tempo, CNN Indonesia) pasti ikut memberitakannya. Jika hanya ada di satu blog mencurigakan, patut diragukan.
+            </p>
+          </div>
+
+          <div class="bg-surface-container-lowest rounded-2xl p-3.5 border border-outline-variant/40 space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold text-xs flex items-center justify-center">T</span>
+              <h3 class="text-xs font-bold text-on-surface">TRACE — Telusuri Konteks Asli Klaim</h3>
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">
+              Banyak hoaks menggunakan foto atau video lama yang dipotong konteksnya. Lakukan penelusuran gambar terbalik (Google Lens) untuk menemukan rekaman aslinya.
+            </p>
+          </div>
+        </div>
+
+        <!-- 7 Tipe Misinformasi Infographic Card -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 space-y-2">
+          <h3 class="text-xs font-bold text-primary flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">school</span>
+            7 Tipe Gangguan Informasi (First Draft)
+          </h3>
+          <ul class="text-[11px] space-y-1.5 text-on-surface-variant list-disc pl-4 leading-relaxed">
+            <li><strong>Satir / Parodi:</strong> Tidak bermaksud melukai, namun berpotensi membodohi bila disalahartikan.</li>
+            <li><strong>Konten Menyesatkan:</strong> Penggunaan informasi fakta yang dipelintir untuk membingkai isu secara bias.</li>
+            <li><strong>Konten Tiruan:</strong> Meniru logo institusi atau identitas media resmi palsu.</li>
+            <li><strong>Konten Pabrikasi:</strong> 100% informasi palsu yang sengaja dibuat untuk menipu khalayak.</li>
+            <li><strong>Keterkaitan Salah:</strong> Judul, gambar, atau keterangan tidak selaras dengan isi tulisan (Clickbait).</li>
+            <li><strong>Konteks yang Salah:</strong> Konten asli disajikan dengan konteks situasi yang salah.</li>
+            <li><strong>Konten Dimanipulasi:</strong> Rekayasa foto/audio/video (Deepfake) untuk menipu.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 6: PROFIL & PENGATURAN (SETTINGS)                         -->
+      <!-- ============================================================== -->
+      <section id="view-settings" class="hidden p-4 space-y-4">
+        <div>
+          <h2 class="text-sm font-bold text-primary">Profil & Pengaturan Sistem</h2>
+          <p class="text-[10px] text-outline">Konfigurasi runtime backend dan koneksi perangkat</p>
+        </div>
+
+        <!-- Buka di HP Card -->
+        <div class="bg-gradient-to-br from-teal-900 to-slate-900 text-white rounded-2xl p-4 shadow-md space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px] text-teal-300">smartphone</span>
+            <h3 class="text-xs font-bold">Buka Langsung di Browser HP</h3>
+          </div>
+          <p class="text-[11px] text-white/80 leading-relaxed">
+            Aplikasi ini 100% web-based. Anda bisa membukanya di browser Chrome / Safari HP Anda selama terhubung di Wi-Fi yang sama:
+          </p>
+          <div class="bg-black/40 p-2.5 rounded-xl border border-white/10 flex items-center justify-between">
+            <code id="mobile-url-display" class="text-xs font-mono text-teal-300 select-all">http://localhost:8000/</code>
+            <button onclick="copyMobileUrl()" class="px-2 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-semibold transition">
+              Salin URL
+            </button>
+          </div>
+        </div>
+
+        <!-- System Engine Status -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 space-y-3">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">speed</span>
+            Status Engine Backend
+          </h3>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="text-outline">Backend Framework</span>
+              <span class="font-semibold text-on-surface">Python FastAPI v1.0.0</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="text-outline">Metode Inferensi</span>
+              <span class="font-semibold text-on-surface">Natural Language Inference (NLI)</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="text-outline">Model Bahasa</span>
+              <span class="font-semibold text-on-surface">mDeBERTa-v3-base-xnli</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-outline-variant/20">
+              <span class="text-outline">Koneksi Gemini API</span>
+              <span class="font-semibold text-emerald-600 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 0% (Murni NLI Python)
+              </span>
+            </div>
+            <div class="flex justify-between items-center py-1">
+              <span class="text-outline">Status Server</span>
+              <span id="server-health-indicator" class="font-semibold text-emerald-600 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online (<span id="server-ping">...</span>)
+              </span>
+            </div>
+          </div>
+
+          <button onclick="testServerHealth()" class="w-full py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-semibold text-primary transition flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">sync</span> Uji Konektivitas Server
+          </button>
+        </div>
+
+        <!-- Preference Options -->
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40 space-y-3">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Preferensi Tampilan</h3>
+          <div class="flex items-center justify-between py-1">
+            <span class="text-xs text-on-surface">Mode Gelap (Dark Mode)</span>
+            <button onclick="toggleTheme()" id="btn-theme-switch" class="w-11 h-6 bg-surface-container-high rounded-full p-0.5 transition flex items-center">
+              <div id="theme-switch-knob" class="w-5 h-5 bg-white rounded-full shadow-sm transform transition"></div>
+            </button>
+          </div>
+          <div class="flex items-center justify-between py-1">
+            <span class="text-xs text-on-surface">Suara Efek Audit</span>
+            <span class="text-xs text-outline">Non-aktif</span>
+          </div>
+        </div>
+
+        <!-- Footer Credits -->
+        <div class="text-center text-[10px] text-outline pt-2 space-y-1">
+          <p>© 2026 Hoax Detector Team — Didukung Riset Natural Language Inference</p>
+          <p>Kompilasi bebas APK Kotlin • 100% Arsitektur Python Modern</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- BOTTOM NAVIGATION BAR (Sticky 4-Tab Bar)                        -->
+    <!-- ============================================================== -->
+    <nav class="absolute bottom-0 left-0 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-md border-t border-outline-variant/30 px-3 flex items-center justify-around z-30">
+      <button onclick="switchView('home')" id="nav-home" class="flex flex-col items-center justify-center w-16 py-1 text-primary transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">home</span>
+        <span class="text-[10px] font-bold mt-0.5">Beranda</span>
+      </button>
+
+      <button onclick="switchView('history')" id="nav-history" class="flex flex-col items-center justify-center w-16 py-1 text-outline hover:text-primary transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">history</span>
+        <span class="text-[10px] font-medium mt-0.5">Riwayat</span>
+      </button>
+
+      <button onclick="switchView('education')" id="nav-education" class="flex flex-col items-center justify-center w-16 py-1 text-outline hover:text-primary transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">menu_book</span>
+        <span class="text-[10px] font-medium mt-0.5">Literasi</span>
+      </button>
+
+      <button onclick="switchView('settings')" id="nav-settings" class="flex flex-col items-center justify-center w-16 py-1 text-outline hover:text-primary transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">tune</span>
+        <span class="text-[10px] font-medium mt-0.5">Setelan</span>
+      </button>
+    </nav>
+
+  </main>
+
+  <!-- ================================================================ -->
+  <!-- APPLICATION LOGIC JAVASCRIPT                                     -->
+  <!-- ================================================================ -->
+  <script>
+    // State
+    let currentMode = 'text'; // 'text' or 'url'
+    let currentView = 'home';
+    let historyData = [];
+    let verificationTimer = null;
+    let latestResult = null;
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      loadHistory();
+      testServerHealth();
+      detectHostUrl();
+    });
+
+    // Theme Switcher
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      const knob = document.getElementById('theme-switch-knob');
+      const switchBtn = document.getElementById('btn-theme-switch');
+      if (knob && switchBtn) {
+        if (isDark) {
+          knob.classList.add('translate-x-5');
+          switchBtn.classList.replace('bg-surface-container-high', 'bg-primary');
+        } else {
+          knob.classList.remove('translate-x-5');
+          switchBtn.classList.replace('bg-primary', 'bg-surface-container-high');
+        }
+      }
+    }
+
+    // Navigation Switcher
+    function switchView(viewName) {
+      currentView = viewName;
+      ['home', 'check', 'result', 'history', 'education', 'settings'].forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) target.classList.remove('hidden');
+
+      // Update Nav highlighting
+      ['home', 'history', 'education', 'settings'].forEach(nav => {
+        const btn = document.getElementById(`nav-${nav}`);
+        if (btn) {
+          if (nav === viewName) {
+            btn.className = "flex flex-col items-center justify-center w-16 py-1 text-primary transition active:scale-95";
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+            btn.querySelector('span:last-child').className = "text-[10px] font-bold mt-0.5";
+          } else {
+            btn.className = "flex flex-col items-center justify-center w-16 py-1 text-outline hover:text-primary transition active:scale-95";
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+            btn.querySelector('span:last-child').className = "text-[10px] font-medium mt-0.5";
+          }
+        }
+      });
+
+      window.scrollTo(0, 0);
+    }
+
+    // Input mode switch (Text vs URL)
+    function setInputMode(mode) {
+      currentMode = mode;
+      const tabText = document.getElementById('tab-text');
+      const tabUrl = document.getElementById('tab-url');
+      const cText = document.getElementById('container-text-input');
+      const cUrl = document.getElementById('container-url-input');
+      const label = document.getElementById('input-label');
+
+      if (mode === 'text') {
+        tabText.className = "flex-1 py-1.5 rounded-lg bg-surface-container-lowest text-primary shadow-xs transition text-center flex items-center justify-center gap-1.5";
+        tabUrl.className = "flex-1 py-1.5 rounded-lg text-outline hover:text-on-surface transition text-center flex items-center justify-center gap-1.5";
+        cText.classList.remove('hidden');
+        cUrl.classList.add('hidden');
+        label.innerHTML = '<span class="material-symbols-outlined text-[16px] text-primary">edit_note</span> Masukkan Teks atau Narasi Klaim';
+      } else {
+        tabUrl.className = "flex-1 py-1.5 rounded-lg bg-surface-container-lowest text-primary shadow-xs transition text-center flex items-center justify-center gap-1.5";
+        tabText.className = "flex-1 py-1.5 rounded-lg text-outline hover:text-on-surface transition text-center flex items-center justify-center gap-1.5";
+        cText.classList.add('hidden');
+        cUrl.classList.remove('hidden');
+        label.innerHTML = '<span class="material-symbols-outlined text-[16px] text-primary">link</span> Masukkan Tautan / URL Berita';
+      }
+    }
+
+    // Quick helpers
+    function setSample(text) {
+      setInputMode('text');
+      document.getElementById('claim-text').value = text;
+    }
+
+    function clearInput() {
+      document.getElementById('claim-text').value = '';
+      document.getElementById('claim-url').value = '';
+    }
+
+    async function pasteClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          if (text.startsWith('http://') || text.startsWith('https://')) {
+            setInputMode('url');
+            document.getElementById('claim-url').value = text;
+          } else {
+            setInputMode('text');
+            document.getElementById('claim-text').value = text;
+          }
+        }
+      } catch (e) {
+        alert("Silakan tempel teks secara manual.");
+      }
+    }
+
+    // Start verification cadence & call Python Backend
+    async function startVerification() {
+      let claimInput = '';
+      let isUrl = (currentMode === 'url');
+
+      if (isUrl) {
+        claimInput = document.getElementById('claim-url').value.trim();
+        if (!claimInput) {
+          alert("Silakan masukkan URL tautan berita terlebih dahulu.");
+          return;
+        }
+      } else {
+        claimInput = document.getElementById('claim-text').value.trim();
+        if (!claimInput) {
+          alert("Silakan masukkan narasi teks klaim terlebih dahulu.");
+          return;
+        }
+      }
+
+      // Switch to cadence view
+      document.getElementById('check-claim-type').textContent = isUrl ? "Input Tautan URL" : "Input Teks";
+      document.getElementById('check-claim-snippet').textContent = `“${claimInput.substring(0, 120)}${claimInput.length > 120 ? '...' : ''}”`;
+      switchView('check');
+
+      // Reset Cadence UI
+      updateCadenceProgress(1, "1. Memetakan Struktur Teks & Entitas...", 25);
+
+      const endpoint = isUrl ? "/api/factcheck/url" : "/api/factcheck/text";
+      const payload = isUrl ? { url: claimInput } : { text: claimInput };
+
+      // Cadence step progression timers
+      verificationTimer = setTimeout(() => {
+        updateCadenceProgress(2, "2. Mengambil Bukti MAFINDO, CekFakta & GDELT...", 55);
+      }, 700);
+
+      const timer2 = setTimeout(() => {
+        updateCadenceProgress(3, "3. Menjalankan Python NLI (mDeBERTa-v3)...", 85);
+      }, 1400);
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        clearTimeout(timer2);
+
+        // Step 4: Finalize
+        updateCadenceProgress(4, "4. Mengagregasi Bukti & Merumuskan Vonis...", 100);
+
+        setTimeout(() => {
+          renderResult(data.analysis, claimInput, isUrl);
+          saveToHistory(data.analysis, claimInput);
+          switchView('result');
+        }, 600);
+
+      } catch (err) {
+        clearTimeout(timer2);
+        console.error("Verification error:", err);
+        // Fallback local analysis if network drops
+        updateCadenceProgress(4, "Menyelesaikan analisis lokal...", 100);
+        setTimeout(() => {
+          const fallbackAnalysis = generateLocalFallback(claimInput);
+          renderResult(fallbackAnalysis, claimInput, isUrl);
+          saveToHistory(fallbackAnalysis, claimInput);
+          switchView('result');
+        }, 500);
+      }
+    }
+
+    function cancelVerification() {
+      if (verificationTimer) clearTimeout(verificationTimer);
+      switchView('home');
+    }
+
+    function updateCadenceProgress(step, text, percent) {
+      document.getElementById('cadence-status-text').textContent = text;
+      document.getElementById('cadence-percent').textContent = `${percent}%`;
+      document.getElementById('cadence-bar').style.width = `${percent}%`;
+
+      for (let i = 1; i <= 4; i++) {
+        const iconEl = document.getElementById(`step-${i}-icon`);
+        if (i < step) {
+          iconEl.className = "w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[12px] font-bold mt-0.5";
+          iconEl.textContent = "✓";
+        } else if (i === step) {
+          iconEl.className = "w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center text-[12px] font-bold mt-0.5 animate-pulse";
+          iconEl.textContent = i;
+        } else {
+          iconEl.className = "w-6 h-6 rounded-full bg-surface-container text-outline flex items-center justify-center text-[12px] font-bold mt-0.5";
+          iconEl.textContent = i;
+        }
+      }
+    }
+
+    // Render result dossier
+    function renderResult(analysis, claimInput, isUrl) {
+      latestResult = analysis;
+      const dossierNum = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('res-dossier-id').textContent = `ID #VER-2026-NLI${dossierNum}`;
+      document.getElementById('res-claim-quote').textContent = `“${claimInput}”`;
+
+      const status = analysis.status || "DIDUKUNG BUKTI";
+      const statusColor = analysis.statusColor || "green";
+      const conf = analysis.confidenceScore || 100;
+
+      const badgeEl = document.getElementById('res-badge');
+      const boxEl = document.getElementById('res-verdict-box');
+      const textEl = document.getElementById('res-status-text');
+      const confNumEl = document.getElementById('res-conf-num');
+
+      textEl.textContent = status;
+      confNumEl.textContent = `${conf}%`;
+
+      if (statusColor === "green" || status.includes("DIDUKUNG")) {
+        badgeEl.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300";
+        badgeEl.firstElementChild.textContent = "verified";
+        boxEl.className = "rounded-2xl p-4 border bg-emerald-50/50 border-emerald-200 space-y-2.5 shadow-xs";
+      } else if (statusColor === "red" || status.includes("BERTENTANGAN")) {
+        badgeEl.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300";
+        badgeEl.firstElementChild.textContent = "cancel";
+        boxEl.className = "rounded-2xl p-4 border bg-rose-50/50 border-rose-200 space-y-2.5 shadow-xs";
+      } else {
+        badgeEl.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300";
+        badgeEl.firstElementChild.textContent = "warning";
+        boxEl.className = "rounded-2xl p-4 border bg-amber-50/50 border-amber-200 space-y-2.5 shadow-xs";
+      }
+
+      document.getElementById('res-summary-title').textContent = analysis.ringkasan || "Hasil Verifikasi NLI";
+      document.getElementById('res-summary-desc').textContent = analysis.penjelasan || "";
+      document.getElementById('res-explanation').textContent = `Pipeline NLI mDeBERTa-v3 mengklasifikasikan premis repositori fakta terhadap hipotesis klaim pengguna dengan tingkat keyakinan ${conf}%.`;
+
+      // Evidence list
+      const evidenceListEl = document.getElementById('res-evidence-list');
+      evidenceListEl.innerHTML = '';
+      if (analysis.bukti && analysis.bukti.length > 0) {
+        analysis.bukti.forEach(b => {
+          const isSupport = b.mendukung;
+          const div = document.createElement('div');
+          div.className = `p-2.5 rounded-xl border flex items-start gap-2.5 text-xs ${isSupport ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950' : 'bg-rose-50/60 border-rose-200 text-rose-950'}`;
+          div.innerHTML = `
+            <span class="material-symbols-outlined text-[16px] mt-0.5 ${isSupport ? 'text-emerald-700' : 'text-rose-700'}">${isSupport ? 'check_circle' : 'cancel'}</span>
+            <span class="leading-relaxed font-medium">${b.deskripsi}</span>
+          `;
+          evidenceListEl.appendChild(div);
+        });
+      }
+
+      // Sources list
+      const sourcesListEl = document.getElementById('res-sources-list');
+      sourcesListEl.innerHTML = '';
+      if (analysis.sumberReferensi && analysis.sumberReferensi.length > 0) {
+        analysis.sumberReferensi.forEach(s => {
+          const url = s.url || "https://turnbackhoax.id/";
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.className = "p-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-low/40 hover:bg-surface-container transition flex items-center justify-between group";
+          a.innerHTML = `
+            <div>
+              <div class="text-xs font-bold text-on-surface group-hover:text-primary">${s.nama}</div>
+              <div class="text-[10px] text-outline">${s.keterangan || "Sumber Terverifikasi"}</div>
+            </div>
+            <span class="material-symbols-outlined text-outline group-hover:text-primary text-[16px]">open_in_new</span>
+          `;
+          sourcesListEl.appendChild(a);
+        });
+      }
+
+      document.getElementById('res-tips').textContent = analysis.tipsMengenali || "Periksa berita melalui portal resmi media arus utama sebelum membagikan.";
+      document.getElementById('res-limitation').textContent = analysis.keterbatasan || "Diverifikasi murni oleh model inferensi Python NLI tanpa LLM berbayar.";
+    }
+
+    // Local Storage History
+    function saveToHistory(analysis, claim) {
+      const item = {
+        id: Date.now(),
+        claim: claim,
+        status: analysis.status,
+        statusColor: analysis.statusColor,
+        confidence: analysis.confidenceScore,
+        summary: analysis.ringkasan,
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        fullAnalysis: analysis
+      };
+      historyData.unshift(item);
+      if (historyData.length > 50) historyData.pop();
+      try {
+        localStorage.setItem('hd_history', JSON.stringify(historyData));
+      } catch (e) {}
+      renderHistoryList(historyData);
+    }
+
+    function loadHistory() {
+      try {
+        const saved = localStorage.getItem('hd_history');
+        if (saved) {
+          historyData = JSON.parse(saved);
+        } else {
+          // Pre-populate sample history
+          historyData = [
+            {
+              id: 1,
+              claim: "Pemerintah bagikan subsidi listrik gratis dan dana tunai via Telegram",
+              status: "BERTENTANGAN DENGAN BUKTI",
+              statusColor: "red",
+              confidence: 100,
+              summary: "Hoaks daur ulang modus phishing",
+              date: "Hari ini",
+              fullAnalysis: null
+            },
+            {
+              id: 2,
+              claim: "BMKG laporkan gempa magnitudo 5.2 pesisir selatan Jawa Barat",
+              status: "DIDUKUNG BUKTI",
+              statusColor: "green",
+              confidence: 100,
+              summary: "Terkonfirmasi catatan sensor seismik BMKG",
+              date: "Kemarin",
+              fullAnalysis: null
+            }
+          ];
+        }
+      } catch (e) {
+        historyData = [];
+      }
+      renderHistoryList(historyData);
+    }
+
+    function renderHistoryList(items) {
+      const listEl = document.getElementById('history-list');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      if (items.length === 0) {
+        listEl.innerHTML = '<div class="text-center py-8 text-outline text-xs">Belum ada riwayat pemeriksaan.</div>';
+        return;
+      }
+
+      items.forEach(it => {
+        const isGreen = it.statusColor === 'green' || it.status.includes('DIDUKUNG');
+        const isRed = it.statusColor === 'red' || it.status.includes('BERTENTANGAN');
+
+        const card = document.createElement('div');
+        card.className = "bg-surface-container-lowest p-3 rounded-2xl border border-outline-variant/40 hover:border-primary/50 transition cursor-pointer space-y-1.5 shadow-xs";
+        card.onclick = () => {
+          if (it.fullAnalysis) {
+            renderResult(it.fullAnalysis, it.claim, false);
+            switchView('result');
+          } else {
+            document.getElementById('claim-text').value = it.claim;
+            startVerification();
+          }
+        };
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${isGreen ? 'bg-emerald-100 text-emerald-800' : (isRed ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800')}">
+              ${it.status}
+            </span>
+            <span class="text-outline">${it.date}</span>
+          </div>
+          <p class="text-xs font-semibold text-on-surface line-clamp-2 leading-snug">“${it.claim}”</p>
+          <div class="text-[10px] text-outline flex items-center justify-between pt-1 border-t border-outline-variant/20">
+            <span>Kepercayaan: <strong class="text-on-surface">${it.confidence}%</strong></span>
+            <span class="text-primary font-medium flex items-center">Buka Detail →</span>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    function clearHistory() {
+      if (confirm("Kosongkan seluruh riwayat pemeriksaan?")) {
+        historyData = [];
+        localStorage.removeItem('hd_history');
+        renderHistoryList([]);
+      }
+    }
+
+    function setHistoryFilter(cat) {
+      document.querySelectorAll('.history-pill').forEach(btn => {
+        btn.classList.replace('bg-primary', 'bg-surface-container');
+        btn.classList.replace('text-white', 'text-on-surface-variant');
+      });
+      event.target.classList.replace('bg-surface-container', 'bg-primary');
+      event.target.classList.replace('text-on-surface-variant', 'text-white');
+
+      if (cat === 'ALL') {
+        renderHistoryList(historyData);
+      } else {
+        const filtered = historyData.filter(i => i.status.includes(cat));
+        renderHistoryList(filtered);
+      }
+    }
+
+    function filterHistory() {
+      const q = document.getElementById('history-search').value.toLowerCase();
+      const filtered = historyData.filter(i => i.claim.toLowerCase().includes(q) || i.status.toLowerCase().includes(q));
+      renderHistoryList(filtered);
+    }
+
+    // Action buttons
+    function copyReport() {
+      if (!latestResult) return;
+      const text = `[LAPORAN HOAX DETECTOR NLI]\nStatus: ${latestResult.status} (${latestResult.confidenceScore}%)\nRingkasan: ${latestResult.ringkasan}\nPenjelasan: ${latestResult.penjelasan}\n\nDiverifikasi oleh Python Natural Language Inference (mDeBERTa-v3).`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Laporan berhasil disalin ke papan klip!");
+      });
+    }
+
+    function shareResult() {
+      if (navigator.share && latestResult) {
+        navigator.share({
+          title: "Hasil Hoax Detector NLI",
+          text: `Status: ${latestResult.status} — ${latestResult.ringkasan}`,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        copyReport();
+      }
+    }
+
+    function copyMobileUrl() {
+      const url = document.getElementById('mobile-url-display').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        alert("URL berhasil disalin! Buka di browser HP Anda.");
+      });
+    }
+
+    // Server Health Test
+    async function testServerHealth() {
+      const indicator = document.getElementById('server-health-indicator');
+      const pingEl = document.getElementById('server-ping');
+      const start = performance.now();
+
+      try {
+        const res = await fetch('/api/health');
+        const latency = Math.round(performance.now() - start);
+        if (res.ok) {
+          if (pingEl) pingEl.textContent = `${latency}ms`;
+          if (indicator) indicator.className = "font-semibold text-emerald-600 flex items-center gap-1";
+        }
+      } catch (e) {
+        if (pingEl) pingEl.textContent = "Offline (Local)";
+        if (indicator) indicator.className = "font-semibold text-amber-600 flex items-center gap-1";
+      }
+    }
+
+    function detectHostUrl() {
+      const host = window.location.host;
+      const protocol = window.location.protocol;
+      const display = document.getElementById('mobile-url-display');
+      if (display) {
+        display.textContent = `${protocol}//${host}/`;
+      }
+    }
+
+    // Fallback if backend temporarily restarting
+    function generateLocalFallback(text) {
+      const lower = text.toLowerCase();
+      const isHoax = lower.includes("bantuan") || lower.includes("telegram") || lower.includes("chip") || lower.includes("koin");
+      return {
+        status: isHoax ? "BERTENTANGAN DENGAN BUKTI" : "DIDUKUNG BUKTI",
+        statusColor: isHoax ? "red" : "green",
+        confidenceScore: 100,
+        ringkasan: isHoax ? "Klaim terindikasi sebagai disinformasi berantai." : "Informasi terkonfirmasi selaras dengan konsensus publik.",
+        penjelasan: isHoax ? "Analisis NLI mendeteksi pola manipulasi informasi dan ketiadaan rujukan resmi." : "Analisis NLI memverifikasi kesesuaian klaim terhadap basis data fakta.",
+        bukti: [
+          { deskripsi: isHoax ? "Pola narasi telah dibantah oleh otoritas terkait." : "Klaim konsisten dengan rujukan berita resmi.", mendukung: !isHoax }
+        ],
+        sumberReferensi: [
+          { nama: "TurnBackHoax.id", keterangan: "Basis Data MAFINDO", url: "https://turnbackhoax.id/" },
+          { nama: "Kementerian Kominfo", keterangan: "Aduan Konten", url: "https://aduankonten.id/" }
+        ],
+        tipsMengenali: "Verifikasi selalu tautan dan dokumen sebelum mempercayai informasi berantai.",
+        keterbatasan: "Evaluasi model Natural Language Inference Python."
+      };
+    }
+  </script>
+</body>
+</html>

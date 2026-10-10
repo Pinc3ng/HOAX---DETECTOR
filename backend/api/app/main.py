@@ -1,9 +1,23 @@
+import os
+import sys
+from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from typing import Optional
 
-from hoax_ml.predict import predict_content_risk, ModelNotFoundError
+# Ensure ML and verifier packages are in Python sys.path
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+for p in [BASE_DIR, os.path.join(BASE_DIR, "ml"), os.path.join(BASE_DIR, "verifier")]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+try:
+    from hoax_ml.predict import predict_content_risk, ModelNotFoundError
+except Exception:
+    predict_content_risk = None
+    ModelNotFoundError = Exception
 
 app = FastAPI(
     title="HOAX-DETECTOR MELALUI NLI API",
@@ -19,6 +33,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+@app.get("/")
+def read_root():
+    index_file = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
+    return {
+        "message": "HOAX-DETECTOR MELALUI NLI — Python FastAPI Engine",
+        "method": "Natural Language Inference (NLI) Premise-Hypothesis Classification",
+        "endpoints": ["/api/health", "/api/factcheck/text", "/api/factcheck/url", "/api/v1/demo/analyze"]
+    }
+
+@app.get("/api/info")
+def read_api_info():
+    return {
+        "message": "HOAX-DETECTOR MELALUI NLI — Python FastAPI Engine",
+        "method": "Natural Language Inference (NLI) Premise-Hypothesis Classification",
+        "endpoints": ["/api/health", "/api/factcheck/text", "/api/factcheck/url", "/api/v1/demo/analyze"]
+    }
+
 class AnalyzeRequest(BaseModel):
     title: Optional[str] = Field(None, description="Optional title of the news or article")
     text: str = Field(..., description="The main content text to analyze")
@@ -32,14 +69,6 @@ class RiskResponse(BaseModel):
     risk_label: str
     risk_score: Optional[float] = None
     reason: Optional[str] = None
-
-@app.get("/")
-def read_root():
-    return {
-        "message": "HOAX-DETECTOR MELALUI NLI — Python FastAPI Engine",
-        "method": "Natural Language Inference (NLI) Premise-Hypothesis Classification",
-        "endpoints": ["/api/health", "/api/factcheck/text", "/api/factcheck/url", "/api/v1/demo/analyze"]
-    }
 
 @app.post("/api/analyze/text", response_model=RiskResponse)
 def analyze_text(req: AnalyzeRequest):

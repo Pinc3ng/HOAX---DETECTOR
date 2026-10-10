@@ -1,12 +1,18 @@
 @echo off
-title Hoax Detector - Python ML & NLP Backend
-echo ========================================================
-echo   Memulai Hoax Detector Python FastAPI Server (Port 8000)...
-echo   Algoritma: NLI Stance Classifier + TF-IDF SVM + MAFINDO
-echo ========================================================
+title Hoax Detector - Python NLI Server
 cd /d "%~dp0backend"
-if exist "venv\Scripts\activate.bat" (
+
+echo ========================================================
+echo   Memulai Hoax Detector Python NLI Server (Port 8000)...
+echo ========================================================
+
+if exist "python_embed\python.exe" (
+    python_embed\python.exe -m uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload
+) else if exist "venv\Scripts\activate.bat" (
     call venv\Scripts\activate.bat
+    uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload
+) else (
+    uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload
 )
-uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload
+
 pause
