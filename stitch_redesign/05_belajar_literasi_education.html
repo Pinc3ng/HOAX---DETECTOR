@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HOAX DETECTOR - Belajar Literasi Media</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed-dim": "#b3c5ff",
+            "surface": "#f8f9ff",
+            "on-secondary": "#ffffff",
+            "error": "#ba1a1a",
+            "on-primary-container": "#89b9c2",
+            "inverse-surface": "#2d3137",
+            "tertiary-fixed": "#a6f3ca",
+            "surface-dim": "#d7dae2",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#002113",
+            "secondary-fixed": "#dbe1ff",
+            "error-container": "#ffdad6",
+            "on-tertiary-container": "#75c09a",
+            "tertiary-container": "#004e33",
+            "outline": "#70787a",
+            "on-tertiary": "#ffffff",
+            "surface-container-high": "#e5e8f0",
+            "on-secondary-container": "#002f7f",
+            "surface-variant": "#dfe2eb",
+            "on-primary-fixed-variant": "#1b4d55",
+            "surface-bright": "#f8f9ff",
+            "surface-container-highest": "#dfe2eb",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#174a52",
+            "surface-container-low": "#f1f3fc",
+            "secondary": "#3159b8",
+            "on-error": "#ffffff",
+            "primary": "#00333a",
+            "on-background": "#181c22",
+            "primary-fixed": "#baebf4",
+            "primary-fixed-dim": "#9fcfd8",
+            "secondary-container": "#769afd",
+            "tertiary": "#003522",
+            "tertiary-fixed-dim": "#8bd6af",
+            "inverse-primary": "#9fcfd8",
+            "outline-variant": "#c0c8ca",
+            "inverse-on-surface": "#eef1f9",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-secondary-fixed-variant": "#0d409f",
+            "background": "#f8f9ff",
+            "surface-tint": "#36656e",
+            "on-surface": "#181c22",
+            "surface-container": "#ebeef6",
+            "on-surface-variant": "#40484a",
+            "on-primary-fixed": "#001f24",
+            "on-secondary-fixed": "#001849"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-lg": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-md": ["Newsreader"],
+            "label-sm": ["Inter"],
+            "title-md": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-sm": ["Newsreader"],
+            "headline-lg": ["Newsreader"],
+            "body-sm": ["Inter"],
+            "headline-lg-mobile": ["Newsreader"],
+            "body-md": ["Inter"]
+          },
+          "fontSize": {
+            "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+            "label-md": ["11px", { "lineHeight": "14px", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "label-sm": ["10px", { "lineHeight": "12px", "fontWeight": "500" }],
+            "title-md": ["16px", { "lineHeight": "22px", "fontWeight": "600" }],
+            "label-lg": ["13px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "38px", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary selection:text-on-primary">
+<!-- Mobile Viewport Wrapper (393px width constraint) -->
+<div class="w-full max-w-[393px] min-h-screen bg-surface flex flex-col relative pb-28 shadow-xl border-x border-outline-variant/30">
+<!-- 1. Android System Status Bar -->
+<div class="w-full h-11 pt-2 px-space-md flex justify-between items-center text-on-surface select-none z-50 bg-surface">
+<span class="font-label-md text-label-md tracking-tight font-semibold">09:41</span>
+<div class="flex items-center space-x-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px]" data-icon="signal_cellular_4_bar">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- Top App Bar (Shared Components standard) -->
+<header class="flex justify-between items-center w-full px-space-md py-space-sm max-w-md mx-auto bg-surface border-b border-outline-variant/30">
+<!-- Leading: Avatar -->
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary-container text-surface flex items-center justify-center font-label-md text-label-md font-bold ring-1 ring-outline-variant/30">
+          HD
+        </div>
+<span class="font-headline-sm text-headline-sm tracking-tight font-semibold text-primary">HOAX DETECTOR</span>
+</div>
+<!-- Trailing: Notifications icon -->
+<button aria-label="Notifications" class="p-1 text-primary hover:bg-surface-container-high/50 rounded transition-colors active:opacity-80" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Editorial Content Canvas -->
+<main class="flex-1 px-space-md pt-space-md space-y-space-lg">
+<!-- 2. Section Header: Magazine Masthead Style -->
+<section class="space-y-space-xs border-b border-outline-variant/30 pb-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-md text-label-md text-primary font-semibold tracking-wider">LITERASI MEDIA &amp; KRITIS</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight tracking-tight">
+          Lebih Cermat Menilai Informasi
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant pt-1 leading-relaxed">
+          Panduan praktis mengenali misinformasi, disinformasi, dan manipulasi media di ruang digital.
+        </p>
+</section>
+<!-- 3. Featured Editorial Guide: Bento Editorial Hero Card -->
+<section>
+<article class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl overflow-hidden shadow-sm flex flex-col group cursor-pointer hover:border-primary-container transition-colors">
+<!-- Editorial Cover Image -->
+<div class="relative w-full h-44 overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="An editorial minimalist flat-lay of classic Indonesian broadsheet newspapers overlaid with a sleek smartphone magnifying glass analyzing distorted digital headlines. Warm subdued morning natural light illuminates fine newsprint fibers and subtle teal ink tones. A balanced composition capturing intellectual clarity, journalistic precision, and investigative critical analysis without high-tech gimmicks." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7zLjVPNfCFygNyglP2TZR_C961JRMZL7d7i0-eeHHWK7GG9ZyULHtLDNjCNO_b2Q0WWdTM5gCRgmaF2Cac5PU4h6D5kF_CI9mpjajlPC12NiFvyRQfw19RJjv3HUgOEc41IV-hlDQZ1zM96LrRqfuFIxBJkGwsRAmlMWKeCLFbKMGmLhJk3wi6gsx6J5QhapnQyreGEZ37aJoHHPQ1UU_-3ujngU5EjOCBumVTdRqg5N0EkinNIWN"/>
+<div class="absolute top-space-sm left-space-sm">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface/95 backdrop-blur-sm border border-outline-variant/40 rounded font-label-md text-label-md text-primary uppercase tracking-wider font-semibold shadow-xs">
+<span class="material-symbols-outlined text-[14px]" data-icon="auto_stories">auto_stories</span>
+                Sorotan Utama
+              </span>
+</div>
+</div>
+<!-- Card Content Body -->
+<div class="p-space-md flex flex-col space-y-space-xs">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-outline">
+<span class="flex items-center gap-1 text-primary-container font-semibold">
+<span class="material-symbols-outlined text-[13px]" data-icon="schedule">schedule</span>
+                5 Menit Baca
+              </span>
+<span>•</span>
+<span class="px-1.5 py-0.5 bg-surface-container rounded text-on-surface-variant font-medium">Tingkat Dasar</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug pt-0.5">
+              Kenali Judul Clickbait &amp; Trik Rekayasa Konteks
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Bagaimana mengenali judul sensasional yang tidak sesuai dengan isi artikel sebenarnya.
+            </p>
+<div class="pt-2 flex items-center justify-between border-t border-outline-variant/30 mt-2">
+<span class="font-label-md text-label-md text-secondary font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                Baca Kajian Lengkap
+                <span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</span>
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="bookmark_border">bookmark_border</span>
+</div>
+</div>
+</article>
+</section>
+<!-- 4. Practical Learning Modules List -->
+<section class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<h3 class="font-title-md text-title-md text-on-surface font-semibold tracking-tight">
+            Modul Pembelajaran
+          </h3>
+<span class="font-label-md text-label-md text-secondary font-semibold">Lihat Semua</span>
+</div>
+<div class="space-y-2.5">
+<!-- Module 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-sm flex items-start gap-space-sm hover:border-primary-container transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary-container">
+<span class="font-headline-sm text-headline-sm font-bold">1</span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between gap-1">
+<h4 class="font-title-md text-[14px] text-on-surface font-semibold leading-tight truncate">
+                  Periksa Sumber Berita
+                </h4>
+<span class="shrink-0 font-label-sm text-label-sm text-outline flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]" data-icon="schedule">schedule</span>
+                  4 mnt
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 line-clamp-1">
+                Membedakan media resmi dan portal kloningan
+              </p>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center px-1.5 py-0.5 bg-surface-container-low text-primary text-[10px] font-label-sm rounded font-medium">
+                  Verifikasi Domain
+                </span>
+</div>
+</div>
+<div class="self-center text-outline">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Module 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-sm flex items-start gap-space-sm hover:border-primary-container transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary-container">
+<span class="font-headline-sm text-headline-sm font-bold">2</span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between gap-1">
+<h4 class="font-title-md text-[14px] text-on-surface font-semibold leading-tight truncate">
+                  Cek Tanggal dan Konteks
+                </h4>
+<span class="shrink-0 font-label-sm text-label-sm text-outline flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]" data-icon="schedule">schedule</span>
+                  6 mnt
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 line-clamp-1">
+                Mencegah hoaks daur ulang dari peristiwa lama
+              </p>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center px-1.5 py-0.5 bg-surface-container-low text-primary text-[10px] font-label-sm rounded font-medium">
+                  Kronologi Waktu
+                </span>
+</div>
+</div>
+<div class="self-center text-outline">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Module 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-sm flex items-start gap-space-sm hover:border-primary-container transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary-container">
+<span class="font-headline-sm text-headline-sm font-bold">3</span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between gap-1">
+<h4 class="font-title-md text-[14px] text-on-surface font-semibold leading-tight truncate">
+                  Bandingkan dengan Sumber Lain
+                </h4>
+<span class="shrink-0 font-label-sm text-label-sm text-outline flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]" data-icon="schedule">schedule</span>
+                  5 mnt
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 line-clamp-1">
+                Teknik lateral reading untuk memverifikasi kebenaran
+              </p>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center px-1.5 py-0.5 bg-surface-container-low text-primary text-[10px] font-label-sm rounded font-medium">
+                  Lateral Reading
+                </span>
+</div>
+</div>
+<div class="self-center text-outline">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Quick Checklist Banner -->
+<section class="pt-1">
+<div class="bg-primary-container text-on-primary rounded-xl p-space-md border border-primary/20 shadow-sm relative overflow-hidden">
+<!-- Background decorative watermarking -->
+<div class="absolute -right-4 -bottom-4 opacity-10 select-none pointer-events-none">
+<span class="material-symbols-outlined text-[110px]" data-icon="verified_user">verified_user</span>
+</div>
+<div class="relative z-10 space-y-2">
+<div class="flex items-center gap-1.5 text-on-primary-container">
+<span class="material-symbols-outlined text-[18px]" data-icon="checklist">checklist</span>
+<span class="font-label-md text-label-md tracking-wider font-semibold uppercase">PANDUAN RINGKAS</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-primary font-semibold leading-tight">
+              5 Langkah Cepat Sebelum Membagikan Berita (Think Before Share)
+            </h3>
+<p class="font-body-sm text-body-sm text-on-primary-container leading-relaxed pt-0.5">
+              Terapkan jeda 10 detik dan cek kredibilitas sebelum menekan tombol kirim di grup percakapan.
+            </p>
+<div class="pt-2">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface text-primary-container hover:bg-surface-bright font-label-md text-label-md font-bold rounded transition-colors active:scale-95" type="button">
+                Buka Lembar Ceklis
+                <span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- 6. Bottom Navigation Bar (Shared Components execution with Belajar ACTIVE) -->
+<!-- JSON Blueprint: fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-md pb-space-md pt-space-xs max-w-md mx-auto -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-md pb-space-md pt-space-xs max-w-md mx-auto bg-surface-container-lowest border-t border-outline-variant/30">
+<!-- Tab 1: Beranda -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:text-primary transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[24px]" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-0.5">Beranda</span>
+</button>
+<!-- Tab 2: Riwayat -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:text-primary transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[24px]" data-icon="history">history</span>
+<span class="font-label-sm text-label-sm mt-0.5">Riwayat</span>
+</button>
+<!-- Tab 3: Belajar (ACTIVE MAPPED TO SCREEN 5 INTENT) -->
+<button class="flex flex-col items-center justify-center text-primary font-semibold py-space-xs hover:text-primary transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[24px]" data-icon="school" data-weight="fill" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-label-sm text-label-sm mt-0.5">Belajar</span>
+</button>
+<!-- Tab 4: Profil -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-space-xs hover:text-primary transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[24px]" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-0.5">Profil</span>
+</button>
+</nav>
+<!-- 7. Android Gesture Bar (Bottom Home Indicator) -->
+<div class="fixed bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-on-surface/30 rounded-full z-[60] pointer-events-none"></div>
+</div>
+</body></html>
