@@ -79,7 +79,7 @@
     <!-- ============================================================== -->
     <header class="w-full bg-white dark:bg-dark-card border-b border-slate-200 dark:border-dark-border px-4 py-3 flex items-center justify-between z-20 flex-none transition-colors duration-200">
       <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchView('home')">
-        <img src="/static/logo.png" alt="Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover border border-primary/20 dark:border-teal-500/30" onerror="this.src='https://placehold.co/36x36/00333a/ffffff?text=HD'" />
+        <img src="logo.png" alt="Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover border border-primary/20 dark:border-teal-500/30" onerror="this.src='/static/logo.png'" />
         <div>
           <div class="flex items-center gap-1.5">
             <span class="font-bold text-sm tracking-tight text-primary dark:text-teal-300">HOAX DETECTOR</span>
@@ -1142,15 +1142,135 @@
       window.scrollTo(0, 0);
     }
 
+    const API_BASE = (window.location.protocol.startsWith('http')) ? '' : 'http://10.6.210.110:8000';
+
+    const DEFAULT_FEED = [
+      {
+        id: "feed-01",
+        title: "Pemerintah Bagikan Bantuan Subsidi Listrik Gratis 2,5 Juta Rupiah Lewat Telegram BUMN",
+        summary: "Pesan berantai mengklaim bantuan langsung tunai via grup Telegram dan meminta pengisian nomor rekening serta KTP.",
+        category: "Finansial & Bansos",
+        status: "BERTENTANGAN DENGAN BUKTI",
+        statusLabel: "HOAKS",
+        statusColor: "red",
+        confidenceScore: 100,
+        date: "10 Okt 2026 • 11:20 WIB",
+        sources: ["TurnBackHoax.id", "Kementerian ESDM RI", "PT PLN (Persero)"],
+        reads: "14.8k dibaca",
+        claimText: "Pemerintah resmi membagikan bantuan subsidi dana tunai 2,5 juta rupiah untuk pengguna kartu SIM lama lewat tautan telegram",
+        evidence: [
+          { deskripsi: "Kementerian ESDM dan PLN tidak pernah menyelenggarakan program bantuan via grup pesan instan.", mendukung: false },
+          { deskripsi: "Tautan mengarah ke formulir phishing yang meminta nomor kartu identitas dan PIN rahasia.", mendukung: false }
+        ]
+      },
+      {
+        id: "feed-02",
+        title: "BMKG: Gempa Tektonik M5.2 Guncang Pesisir Selatan Jawa Barat Tidak Berpotensi Tsunami",
+        summary: "Sensor seismik mencatat aktivitas subduksi lempeng Indo-Australia dengan kedalaman 48 km. Masyarakat diimbau tetap tenang.",
+        category: "Bencana & Iklim",
+        status: "DIDUKUNG BUKTI",
+        statusLabel: "FAKTA",
+        statusColor: "green",
+        confidenceScore: 100,
+        date: "10 Okt 2026 • 09:45 WIB",
+        sources: ["Badan Meteorologi Klimatologi dan Geofisika (BMKG)", "BNPB Indonesia"],
+        reads: "29.1k dibaca",
+        claimText: "BMKG melaporkan gempa magnitudo 5.2 mengguncang wilayah pesisir selatan Jawa Barat tidak berpotensi tsunami",
+        evidence: [
+          { deskripsi: "Data magnitudo dan episenter konsisten dengan rekaman sensor seismograf BMKG secara real-time.", mendukung: true },
+          { deskripsi: "Hasil pemodelan numerik laut menunjukkan nihil ancaman gelombang tsunami.", mendukung: true }
+        ]
+      },
+      {
+        id: "feed-03",
+        title: "Uang Logam 1000 Rupiah Gambar Kelapa Sawit Ditukar Ratusan Juta Rupiah oleh Bank Indonesia",
+        summary: "Klaim di media sosial bahwa Bank Indonesia membeli kembali koin kelapa sawit seharga 50 juta sampai 100 juta rupiah per keping.",
+        category: "Ekonomi & Moneter",
+        status: "BERTENTANGAN DENGAN BUKTI",
+        statusLabel: "HOAKS",
+        statusColor: "red",
+        confidenceScore: 100,
+        date: "09 Okt 2026 • 16:15 WIB",
+        sources: ["Bank Indonesia", "MAFINDO", "Kementerian Keuangan"],
+        reads: "21.4k dibaca",
+        claimText: "Koin kuno kelapa sawit 1000 rupiah dihargai ratusan juta rupiah oleh kolektor bank indonesia",
+        evidence: [
+          { deskripsi: "Bank Indonesia menegaskan nilai tukar uang logam nominal Rp1.000 tetap setara dengan nilai nominalnya.", mendukung: false },
+          { deskripsi: "Isu harga ratusan juta rupiah merupakan gorengan spekulasi akun penjual daring.", mendukung: false }
+        ]
+      },
+      {
+        id: "feed-04",
+        title: "Presiden Resmikan Ruas Baru Jalan Tol Trans Sumatera Percepat Akses Antar-Provinsi",
+        summary: "Peresmian ruas tol strategis sepanjang 42 km memangkas waktu tempuh logistik pangan hingga 60% dibanding jalur arteri.",
+        category: "Infrastruktur",
+        status: "DIDUKUNG BUKTI",
+        statusLabel: "FAKTA",
+        statusColor: "green",
+        confidenceScore: 100,
+        date: "09 Okt 2026 • 13:00 WIB",
+        sources: ["LKBN ANTARA", "Kementerian Pekerjaan Umum RI", "Sekretariat Presiden"],
+        reads: "18.6k dibaca",
+        claimText: "Presiden Jokowi meresmikan jalan tol trans sumatera ruas baru untuk mempercepat mobilitas logistik",
+        evidence: [
+          { deskripsi: "Siaran pers resmi Biro Pers Sekretariat Presiden mendokumentasikan kegiatan peresmian secara langsung.", mendukung: true },
+          { deskripsi: "Badan Pengatur Jalan Tol (BPJT) mengumumkan operasional ruas tol dengan tarif nol rupiah pada pekan awal.", mendukung: true }
+        ]
+      },
+      {
+        id: "feed-05",
+        title: "Peredaran Beras Berbahan Sintetis Plastik di Pasar Tradisional Seluruh Indonesia",
+        summary: "Video pembakaran gumpalan nasi yang memantul dan meleleh diklaim sebagai bukti beras plastik berbahaya buatan luar negeri.",
+        category: "Pangan & Kesehatan",
+        status: "BERTENTANGAN DENGAN BUKTI",
+        statusLabel: "HOAKS",
+        statusColor: "red",
+        confidenceScore: 100,
+        date: "08 Okt 2026 • 18:30 WIB",
+        sources: ["Badan Pangan Nasional", "BPOM RI", "Kementerian Pertanian"],
+        reads: "32.0k dibaca",
+        claimText: "Peredaran beras berbahan plastik sintetis beracun di pasar tradisional",
+        evidence: [
+          { deskripsi: "Uji laboratorium akreditasi BPOM dan Kementan menunjukkan 100% sampel adalah karbohidrat beras alami (amilosa & amilopektin).", mendukung: false },
+          { deskripsi: "Bahan plastik memiliki titik leleh tinggi yang tidak mungkin diproduksi menjadi butiran menyerupai beras dengan harga murah.", mendukung: false }
+        ]
+      },
+      {
+        id: "feed-06",
+        title: "Kemendikbud Buka Pendaftaran Beasiswa Unggulan Tahap II Melalui Portal Resmi Puslapdik",
+        summary: "Pendaftaran beasiswa jenjang S1, S2, dan S3 bagi mahasiswa berprestasi dan pegawai berstatus ASN telah dibuka secara daring.",
+        category: "Pendidikan",
+        status: "DIDUKUNG BUKTI",
+        statusLabel: "FAKTA",
+        statusColor: "green",
+        confidenceScore: 100,
+        date: "08 Okt 2026 • 10:15 WIB",
+        sources: ["Puslapdik Kemendikbudristek", "Kementerian Agama"],
+        reads: "44.7k dibaca",
+        claimText: "Kemendikbud membuka pendaftaran resmi program beasiswa unggulan melalui portal resmi",
+        evidence: [
+          { deskripsi: "Pengumuman tayang di domain resmi berakhiran go.id tanpa pungutan biaya pendaftaran.", mendukung: true },
+          { deskripsi: "Juknis dan pedoman seleksi dapat diunduh bebas oleh seluruh calon pendaftar.", mendukung: true }
+        ]
+      }
+    ];
+
     // ==============================================================
     // FEED BERITA & HOAKS TERKINI (BERANDA UTAMA)
     // ==============================================================
     async function loadFeed() {
+      // 1. Render default feed immediately for instant response
+      newsFeedData = DEFAULT_FEED;
+      renderNewsFeed(newsFeedData);
+
+      // 2. Fetch fresh feed from API if available
       try {
-        const res = await fetch('/api/feed/latest');
+        const res = await fetch(API_BASE + '/api/feed/latest');
         if (res.ok) {
           const data = await res.json();
-          newsFeedData = data.feed || [];
+          if (data.feed && data.feed.length > 0) {
+            newsFeedData = data.feed;
+          }
           if (data.trendingAlert) {
             document.getElementById('alert-title').textContent = data.trendingAlert.title;
             document.getElementById('alert-desc').textContent = data.trendingAlert.message;
@@ -1158,7 +1278,7 @@
           renderNewsFeed(newsFeedData);
         }
       } catch (e) {
-        console.error("Gagal memuat feed:", e);
+        console.warn("Using offline feed data:", e);
       }
     }
 
@@ -1338,7 +1458,7 @@
       btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Mengirim...`;
 
       try {
-        const res = await fetch('/api/auth/send-otp', {
+        const res = await fetch(API_BASE + '/api/auth/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email })
@@ -1406,7 +1526,7 @@
       }
 
       try {
-        const res = await fetch('/api/auth/verify-otp', {
+        const res = await fetch(API_BASE + '/api/auth/verify-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email, otp: otp })
@@ -1455,7 +1575,7 @@
       }
 
       try {
-        const res = await fetch('/api/auth/register', {
+        const res = await fetch(API_BASE + '/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email, fullName: fullName, password: password })
@@ -1488,7 +1608,7 @@
       }
 
       try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch(API_BASE + '/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email, password: password })
@@ -1634,7 +1754,7 @@
       }, 1400);
 
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(API_BASE + endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -1928,7 +2048,7 @@
       const pingEl = document.getElementById('server-ping');
       const start = performance.now();
       try {
-        const res = await fetch('/api/health');
+        const res = await fetch(API_BASE + '/api/health');
         const latency = Math.round(performance.now() - start);
         if (res.ok && pingEl) pingEl.textContent = `${latency}ms`;
       } catch (e) {

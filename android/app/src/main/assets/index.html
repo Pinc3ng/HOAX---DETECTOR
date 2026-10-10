@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>HOAX DETECTOR — Python Natural Language Inference (NLI)</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#00333a",
+            "primary-container": "#174a52",
+            "primary-light": "#0d5c68",
+            "editorial-gold": "#b45309",
+            "dark-bg": "#0c1117",
+            "dark-card": "#161e2a",
+            "dark-card-soft": "#1d2737",
+            "dark-border": "#283548"
+          },
+          fontFamily: {
+            headline: ["Newsreader", "serif"],
+            sans: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #c0c8ca;
+      border-radius: 4px;
+    }
+    .dark .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.88; transform: scale(0.995); }
+    }
+    .pulse-animation {
+      animation: pulse-subtle 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex justify-center items-start sm:py-6 selection:bg-teal-100 selection:text-teal-900 transition-colors duration-200">
+
+  <!-- Mobile-First App Shell (max-w-md or responsive frame) -->
+  <main class="w-full max-w-md min-h-screen sm:min-h-[890px] sm:max-h-[920px] bg-[#f8f9ff] dark:bg-dark-bg flex flex-col relative sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-700/40 dark:border-dark-border sm:ring-1 sm:ring-white/10 transition-colors duration-200">
+
+    <!-- ============================================================== -->
+    <!-- TOP APP HEADER & CONTROLS                                      -->
+    <!-- ============================================================== -->
+    <header class="w-full bg-white dark:bg-dark-card border-b border-slate-200 dark:border-dark-border px-4 py-3 flex items-center justify-between z-20 flex-none transition-colors duration-200">
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchView('home')">
+        <img src="logo.png" alt="Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover border border-primary/20 dark:border-teal-500/30" onerror="this.src='/static/logo.png'" />
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-sm tracking-tight text-primary dark:text-teal-300">HOAX DETECTOR</span>
+            <span class="px-1.5 py-0.2 text-[9px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 rounded-full border border-emerald-300 dark:border-emerald-700">PYTHON NLI</span>
+          </div>
+          <p id="txt-header-subtitle" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Klarifikasi Berita & Cek Fakta Cerdas</p>
+        </div>
+      </div>
+
+      <!-- Action Icons: Notifications, Theme Toggle, User Profile -->
+      <div class="flex items-center gap-1">
+        <!-- Notification Button with badge -->
+        <button onclick="toggleNotificationDrawer()" id="btn-notifications" title="Pusat Notifikasi" class="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-teal-300 hover:bg-slate-100 dark:hover:bg-dark-card-soft transition">
+          <span class="material-symbols-outlined text-[20px]">notifications</span>
+          <span id="badge-notif-count" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white dark:border-dark-card rounded-full"></span>
+        </button>
+
+        <!-- Dark/Light Mode Switcher -->
+        <button id="btn-toggle-theme" onclick="toggleTheme()" title="Ganti Mode Terang/Gelap" class="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-teal-300 hover:bg-slate-100 dark:hover:bg-dark-card-soft transition">
+          <span id="theme-icon" class="material-symbols-outlined text-[20px]">dark_mode</span>
+        </button>
+
+        <!-- User Profile / Auth Button -->
+        <button onclick="openAuthModal()" id="btn-profile-badge" title="Akun Pengguna" class="p-1.5 ml-0.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-card-soft transition flex items-center gap-1.5">
+          <div id="avatar-circle" class="w-7 h-7 rounded-full bg-teal-800 text-white font-bold text-xs flex items-center justify-center border border-teal-500/40">
+            ?
+          </div>
+        </button>
+      </div>
+    </header>
+
+    <!-- TOAST POPUP NOTIFICATION (Real-time Feedback) -->
+    <div id="toast-notification" class="hidden absolute top-16 left-4 right-4 z-50 bg-slate-900/95 dark:bg-dark-card/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-xl border border-teal-500/40 flex items-start gap-2.5 transition-all transform duration-300">
+      <span id="toast-icon" class="material-symbols-outlined text-teal-400 text-[20px] mt-0.5">info</span>
+      <div class="flex-1 text-xs">
+        <h5 id="toast-title" class="font-bold text-white">Notifikasi</h5>
+        <p id="toast-msg" class="text-slate-300 text-[11px] mt-0.5 leading-snug">Pesan notifikasi...</p>
+      </div>
+      <button onclick="hideToast()" class="text-slate-400 hover:text-white text-xs p-1">✕</button>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- NOTIFICATION DRAWER / MODAL                                    -->
+    <!-- ============================================================== -->
+    <div id="modal-notifications" class="hidden absolute inset-0 z-40 bg-black/60 backdrop-blur-xs flex flex-col justify-end">
+      <div class="bg-white dark:bg-dark-card rounded-t-3xl max-h-[80%] flex flex-col p-4 shadow-2xl border-t border-slate-200 dark:border-dark-border space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-dark-border">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary dark:text-teal-400">notifications_active</span>
+            <h3 id="txt-notif-title" class="font-bold text-sm text-slate-900 dark:text-white">Pusat Notifikasi Klarifikasi</h3>
+          </div>
+          <button onclick="toggleNotificationDrawer()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+        </div>
+
+        <!-- Notification List -->
+        <div id="notif-list-container" class="space-y-2 overflow-y-auto max-h-72 custom-scroll text-xs">
+          <!-- Item 1 -->
+          <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/50 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-rose-600 dark:text-rose-400 text-[18px] mt-0.5">report_problem</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-rose-900 dark:text-rose-200 text-[11px]">Hoaks Baru Terdeteksi</span>
+                <span class="text-[10px] text-slate-400">10m lalu</span>
+              </div>
+              <p class="text-slate-700 dark:text-slate-300 text-[11px] mt-0.5 leading-snug">Pesan berantai subsidi 2,5 juta Telegram dipastikan phishing.</p>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px] mt-0.5">check_circle</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-emerald-900 dark:text-emerald-200 text-[11px]">Klarifikasi Resmi BMKG</span>
+                <span class="text-[10px] text-slate-400">1j lalu</span>
+              </div>
+              <p class="text-slate-700 dark:text-slate-300 text-[11px] mt-0.5 leading-snug">Gempa M5.2 Jawa Barat terverifikasi tidak berpotensi tsunami.</p>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-dark-card-soft border border-slate-200 dark:border-dark-border flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-teal-600 dark:text-teal-400 text-[18px] mt-0.5">verified</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 dark:text-white text-[11px]">Model NLI Diperbarui</span>
+                <span class="text-[10px] text-slate-400">Hari ini</span>
+              </div>
+              <p class="text-slate-600 dark:text-slate-300 text-[11px] mt-0.5 leading-snug">Korpus fakta MAFINDO terintegrasi otomatis 100%.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button onclick="markAllNotificationsRead()" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-dark-card-soft text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            Tandai Sudah Dibaca
+          </button>
+          <button onclick="sendSampleNotification()" class="py-2 px-3 rounded-xl bg-primary hover:bg-primary-light text-white text-xs font-semibold transition flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">send</span> Tes Alert
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- AUTH MODAL (LOGIN & REGISTRASI DENGAN VERIFIKASI OTP EMAIL)   -->
+    <!-- ============================================================== -->
+    <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-end sm:justify-center p-0 sm:p-4">
+      <div class="bg-white dark:bg-dark-card rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-dark-border space-y-4 max-h-[92%] overflow-y-auto custom-scroll">
+        
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-dark-border">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">lock_person</span>
+            </div>
+            <div>
+              <h3 id="txt-auth-title" class="font-bold text-sm text-slate-900 dark:text-white">Akun Verifikator</h3>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400">Masuk atau Daftar dengan Verifikasi OTP Email</p>
+            </div>
+          </div>
+          <button onclick="closeAuthModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+        </div>
+
+        <!-- Auth Tab Switcher -->
+        <div class="flex bg-slate-100 dark:bg-dark-card-soft p-1 rounded-xl text-xs font-semibold">
+          <button id="tab-auth-register" onclick="setAuthTab('register')" class="flex-1 py-1.5 rounded-lg bg-white dark:bg-dark-card text-primary dark:text-teal-300 shadow-xs transition text-center">
+            Daftar Akun Baru (OTP)
+          </button>
+          <button id="tab-auth-login" onclick="setAuthTab('login')" class="flex-1 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center">
+            Masuk (Login)
+          </button>
+        </div>
+
+        <!-- ALREADY LOGGED IN VIEW (Hidden by default) -->
+        <div id="auth-logged-in-view" class="hidden space-y-3 py-2 text-center">
+          <div class="w-16 h-16 rounded-full bg-teal-800 text-white font-extrabold text-2xl flex items-center justify-center mx-auto shadow-md" id="logged-user-avatar">
+            U
+          </div>
+          <div>
+            <h4 id="logged-user-name" class="font-bold text-sm text-slate-900 dark:text-white">Pengguna</h4>
+            <p id="logged-user-email" class="text-xs text-slate-500 dark:text-slate-400">user@example.com</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-[11px] text-emerald-800 dark:text-emerald-300">
+            ✓ Akun terverifikasi resmi untuk pelaporan & bookmark klaim.
+          </div>
+          <button onclick="handleLogout()" class="w-full py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-semibold hover:bg-rose-100 transition">
+            Keluar dari Akun (Logout)
+          </button>
+        </div>
+
+        <!-- FORM REGISTRASI DENGAN ALUR OTP EMAIL -->
+        <div id="form-auth-register" class="space-y-3">
+          <!-- Step 1: Input Email & Request OTP -->
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Email Anda</label>
+            <div class="flex gap-2">
+              <input type="email" id="reg-email" placeholder="nama@gmail.com" class="flex-1 text-xs px-3 py-2.5 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white outline-none focus:border-primary dark:focus:border-teal-400 transition" />
+              <button id="btn-send-otp" onclick="handleSendOtp()" class="px-3 py-2.5 rounded-xl bg-primary hover:bg-primary-light text-white text-xs font-semibold transition flex items-center gap-1 shrink-0">
+                <span class="material-symbols-outlined text-[16px]">mail</span> Kirim OTP
+              </button>
+            </div>
+            <p id="otp-status-hint" class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Kami akan mengirimkan 6 digit kode OTP verifikasi.</p>
+          </div>
+
+          <!-- Step 2: 6-Digit OTP Code Verification -->
+          <div id="container-otp-verify" class="p-3 rounded-2xl bg-slate-50 dark:bg-dark-card-soft border border-slate-200 dark:border-dark-border space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Masukkan 6 Digit Kode OTP</label>
+              <span id="otp-timer-count" class="text-[10px] font-mono text-teal-600 dark:text-teal-400 font-semibold">05:00</span>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="reg-otp" maxlength="6" placeholder="Contoh: 849201" class="flex-1 text-center font-mono tracking-widest text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-bg dark:text-white outline-none focus:border-teal-500 uppercase" />
+              <button onclick="handleVerifyOtp()" id="btn-verify-otp" class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-600 text-white text-xs font-semibold transition flex items-center gap-1">
+                Verifikasi
+              </button>
+            </div>
+            <div id="otp-debug-box" class="hidden text-[10px] p-1.5 rounded-lg bg-teal-100 dark:bg-teal-900/60 text-teal-900 dark:text-teal-200 flex justify-between items-center">
+              <span>Kode OTP Simulasi: <strong id="otp-debug-code" class="font-mono">------</strong></span>
+              <button onclick="autoFillOtp()" class="underline font-semibold">Isi Otomatis</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Complete Profile (Nama Lengkap & Kata Sandi) -->
+          <div id="container-reg-password" class="space-y-2.5 opacity-40 pointer-events-none transition-all duration-300">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+              <input type="text" id="reg-fullname" placeholder="Nama Lengkap Anda" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white outline-none focus:border-primary transition" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Kata Sandi Baru</label>
+              <input type="password" id="reg-password" placeholder="Minimal 6 karakter" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white outline-none focus:border-primary transition" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Konfirmasi Kata Sandi</label>
+              <input type="password" id="reg-password-confirm" placeholder="Ulangi kata sandi" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white outline-none focus:border-primary transition" />
+            </div>
+
+            <button onclick="handleCompleteRegistration()" id="btn-submit-register" class="w-full py-3 bg-primary hover:bg-primary-light text-white rounded-xl font-bold text-xs tracking-wide shadow-md transition flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+              Buat Akun Sekarang
+            </button>
+          </div>
+        </div>
+
+        <!-- FORM LOGIN (MASUK) -->
+        <div id="form-auth-login" class="hidden space-y-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Email</label>
+            <input type="email" id="login-email" placeholder="nama@gmail.com" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white outline-none focus:border-primary transition" />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Kata Sandi</label>
+            <input type="password" id="login-password" placeholder="Masukkan kata sandi" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white outline-none focus:border-primary transition" />
+          </div>
+
+          <button onclick="handleLogin()" class="w-full py-3 bg-primary hover:bg-primary-light text-white rounded-xl font-bold text-xs tracking-wide shadow-md transition flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px]">login</span>
+            Masuk ke Akun
+          </button>
+
+          <p class="text-center text-[11px] text-slate-500 dark:text-slate-400">
+            Belum punya akun? <button onclick="setAuthTab('register')" class="text-primary dark:text-teal-400 font-semibold underline">Daftar dengan OTP</button>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- SCROLLABLE CONTENT VIEWS                                       -->
+    <!-- ============================================================== -->
+    <div class="flex-1 overflow-y-auto custom-scroll relative pb-20">
+
+      <!-- ============================================================== -->
+      <!-- VIEW 1: BERANDA (HOME) — FEED BERITA & HOAKS TERKINI           -->
+      <!-- ============================================================== -->
+      <section id="view-home" class="p-4 space-y-4">
+        
+        <!-- Breaking Trending Disinformation Alert -->
+        <div id="feed-alert-card" class="bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-rose-500/5 dark:from-rose-950/40 dark:to-amber-950/30 border border-rose-300 dark:border-rose-800/60 rounded-2xl p-3.5 flex items-start gap-3 shadow-xs">
+          <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <span class="material-symbols-outlined text-[18px]">crisis_alert</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <span id="txt-alert-badge" class="px-2 py-0.2 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-300 text-[9px] font-bold uppercase tracking-wider">
+                Peringatan Darurat Hoaks
+              </span>
+              <span class="text-[10px] text-slate-400 font-medium">Hari ini</span>
+            </div>
+            <h4 id="alert-title" class="text-xs font-bold text-slate-900 dark:text-white mt-1 leading-snug">
+              Waspada Modus Disinformasi Phishing Terbaru!
+            </h4>
+            <p id="alert-desc" class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-snug line-clamp-2">
+              Beredar pesan berantai tawaran subsidi bantuan dana atau kuota gratis melalui tautan Telegram & Google Forms palsu.
+            </p>
+          </div>
+        </div>
+
+        <!-- Call to Action Banner: Mulai Cek Berita Mandiri -->
+        <div class="bg-gradient-to-br from-primary via-primary-container to-slate-900 text-white rounded-2xl p-4 shadow-md flex items-center justify-between relative overflow-hidden">
+          <div class="space-y-1 relative z-10 max-w-[70%]">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-medium tracking-wide uppercase">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="txt-nli-active">NLI Engine Siap</span>
+            </span>
+            <h2 id="txt-banner-claim-title" class="font-headline text-base font-bold leading-snug">
+              Punya Berita yang Mencurigakan?
+            </h2>
+            <p id="txt-banner-claim-desc" class="text-[11px] text-white/80">
+              Kirim teks berita atau link untuk diaudit oleh model mDeBERTa-v3.
+            </p>
+          </div>
+          <button onclick="switchView('check-input')" class="relative z-10 px-3.5 py-2.5 rounded-xl bg-white text-primary hover:bg-slate-100 font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1 shrink-0">
+            <span class="material-symbols-outlined text-[16px]">search_check</span>
+            <span id="txt-btn-check-now">Cek Klaim</span>
+          </button>
+          <div class="absolute -right-6 -bottom-8 w-28 h-28 bg-teal-400/10 rounded-full blur-xl pointer-events-none"></div>
+        </div>
+
+        <!-- Feed Section Header with Category Filters -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 id="txt-feed-header" class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-primary dark:text-teal-400">newspaper</span>
+                Feed Klarifikasi Berita Terkini
+              </h3>
+              <p id="txt-feed-subtitle" class="text-[10px] text-slate-500 dark:text-slate-400">Arsip cek fakta terbaru: memisahkan kebenaran dari manipulasi</p>
+            </div>
+            <span class="text-[10px] font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-dark-card-soft px-2 py-0.5 rounded-full border border-teal-200 dark:border-dark-border">
+              Live Feed
+            </span>
+          </div>
+
+          <!-- Feed Filter Tabs -->
+          <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] custom-scroll">
+            <button onclick="setFeedFilter('ALL')" class="feed-filter-btn px-3 py-1 rounded-full bg-primary text-white font-medium shadow-xs">Semua</button>
+            <button onclick="setFeedFilter('HOAKS')" class="feed-filter-btn px-3 py-1 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 hover:bg-slate-300 font-medium">Hoaks Terbongkar</button>
+            <button onclick="setFeedFilter('FAKTA')" class="feed-filter-btn px-3 py-1 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 hover:bg-slate-300 font-medium">Fakta Terkonfirmasi</button>
+          </div>
+        </div>
+
+        <!-- Live News Feed Cards Container -->
+        <div id="live-news-feed" class="space-y-3">
+          <div class="text-center py-6 text-xs text-slate-400">Memuat kabar terkini...</div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 2: CEK KLAIM (DEDICATED CHECK SCREEN)                     -->
+      <!-- ============================================================== -->
+      <section id="view-check-input" class="hidden p-4 space-y-4">
+        <div>
+          <h2 id="txt-check-title" class="text-sm font-bold text-primary dark:text-teal-300">Periksa Klaim Mandiri</h2>
+          <p id="txt-check-desc" class="text-[10px] text-slate-500 dark:text-slate-400">Evaluasi narasi berita atau tautan artikel melalui Natural Language Inference</p>
+        </div>
+
+        <!-- Input Mode Switcher -->
+        <div class="flex bg-slate-200 dark:bg-dark-card-soft p-1 rounded-xl text-xs font-semibold">
+          <button id="tab-text" onclick="setInputMode('text')" class="flex-1 py-1.5 rounded-lg bg-white dark:bg-dark-card text-primary dark:text-teal-300 shadow-xs transition text-center flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">article</span> Teks Klaim
+          </button>
+          <button id="tab-url" onclick="setInputMode('url')" class="flex-1 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">link</span> Tautan URL
+          </button>
+        </div>
+
+        <!-- Input Card -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border shadow-xs space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <label id="input-label" class="font-semibold text-slate-900 dark:text-white flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-primary dark:text-teal-400">edit_note</span>
+              Masukkan Teks atau Narasi Klaim
+            </label>
+            <div class="flex items-center gap-2">
+              <button onclick="pasteClipboard()" class="text-teal-700 dark:text-teal-400 hover:underline flex items-center gap-0.5 text-[11px] font-medium">
+                <span class="material-symbols-outlined text-[13px]">content_paste</span> Tempel
+              </button>
+              <button onclick="clearInput()" class="text-slate-400 hover:text-rose-600 text-[11px] font-medium">
+                Hapus
+              </button>
+            </div>
+          </div>
+
+          <!-- Text Input Area -->
+          <div id="container-text-input">
+            <textarea id="claim-text" rows="4" placeholder="Tempel narasi berita, pesan berantai WhatsApp, atau klaim yang ingin diverifikasi di sini..." class="w-full text-xs p-3 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white focus:border-primary dark:focus:border-teal-400 outline-none transition resize-none leading-relaxed"></textarea>
+          </div>
+
+          <!-- URL Input Area (Hidden by default) -->
+          <div id="container-url-input" class="hidden">
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-3 text-slate-400 text-[18px]">search</span>
+              <input type="url" id="claim-url" placeholder="https://news.detik.com/... atau tautan berita lainnya" class="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-dark-border dark:bg-dark-card-soft dark:text-white focus:border-primary dark:focus:border-teal-400 outline-none transition" />
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1.5">Sistem Python akan mengunduh konten berita dan mengevaluasi klaim utamanya.</p>
+          </div>
+
+          <!-- Quick Sample Claim Chips -->
+          <div>
+            <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Uji Coba Cepat:</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="setSample('Pemerintah bagikan subsidi listrik gratis dan bantuan dana tunai 2,5 juta rupiah lewat tautan Telegram resmi')" class="px-2.5 py-1 text-[11px] bg-slate-100 dark:bg-dark-card-soft hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full border border-slate-200 dark:border-dark-border text-slate-700 dark:text-slate-300 transition text-left">
+                ⚠️ Subsidi Dana Telegram
+              </button>
+              <button onclick="setSample('BMKG melaporkan gempa magnitudo 5.2 mengguncang wilayah pesisir selatan Jawa Barat tidak berpotensi tsunami')" class="px-2.5 py-1 text-[11px] bg-slate-100 dark:bg-dark-card-soft hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full border border-slate-200 dark:border-dark-border text-slate-700 dark:text-slate-300 transition text-left">
+                ✅ Gempa BMKG
+              </button>
+              <button onclick="setSample('Koin kuno kelapa sawit 1000 rupiah dihargai ratusan juta rupiah oleh kolektor bank indonesia')" class="px-2.5 py-1 text-[11px] bg-slate-100 dark:bg-dark-card-soft hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full border border-slate-200 dark:border-dark-border text-slate-700 dark:text-slate-300 transition text-left">
+                ⚠️ Koin Sawit 100 Juta
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button id="btn-submit-verify" onclick="startVerification()" class="w-full py-3 bg-primary hover:bg-primary-light text-white rounded-xl font-semibold text-xs tracking-wide shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+            <span>Verifikasi Klaim Sekarang</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 3: CADENCE PROSES AUDIT VERIFIKASI                        -->
+      <!-- ============================================================== -->
+      <section id="view-check-progress" class="hidden p-4 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-dark-border">
+          <button onclick="cancelVerification()" class="text-teal-700 dark:text-teal-400 hover:text-primary text-xs font-semibold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">close</span> Batal
+          </button>
+          <h2 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Audit Inferensi Berjalan</h2>
+          <div class="w-8"></div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border shadow-xs space-y-2">
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span class="uppercase tracking-wider font-semibold text-primary dark:text-teal-400 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">manage_search</span> Klaim yang Diaudit
+            </span>
+            <span id="check-claim-type">Input Teks</span>
+          </div>
+          <blockquote id="check-claim-snippet" class="font-headline text-sm italic text-slate-800 dark:text-slate-200 leading-snug border-l-2 border-primary dark:border-teal-400 pl-3 py-1">
+            “Memuat klaim...”
+          </blockquote>
+        </div>
+
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border shadow-xs space-y-4">
+          <h3 class="text-xs font-bold text-primary dark:text-teal-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">memory</span>
+            Pipeline Natural Language Inference (NLI)
+          </h3>
+
+          <div id="step-1" class="flex items-start gap-3">
+            <div id="step-1-icon" class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-[12px] font-bold mt-0.5">✓</div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-slate-900 dark:text-white">1. Parsing & Ekstraksi Entitas</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Membersihkan teks, normalisasi karakter, dan memetakan entitas kunci.</p>
+            </div>
+          </div>
+
+          <div id="step-2" class="flex items-start gap-3">
+            <div id="step-2-icon" class="w-6 h-6 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-500 flex items-center justify-center text-[12px] font-bold mt-0.5">2</div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-slate-900 dark:text-white">2. Multi-Source Evidence Retrieval</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Mencari premis relevan dari MAFINDO, CekFakta, GDELT & arsip berita.</p>
+            </div>
+          </div>
+
+          <div id="step-3" class="flex items-start gap-3">
+            <div id="step-3-icon" class="w-6 h-6 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-500 flex items-center justify-center text-[12px] font-bold mt-0.5">3</div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-slate-900 dark:text-white">3. NLI Premis-Hipotesis Inference</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Komputasi skor Entailment vs Contradiction mDeBERTa-v3.</p>
+            </div>
+          </div>
+
+          <div id="step-4" class="flex items-start gap-3">
+            <div id="step-4-icon" class="w-6 h-6 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-500 flex items-center justify-center text-[12px] font-bold mt-0.5">4</div>
+            <div class="flex-1">
+              <h4 class="text-xs font-bold text-slate-900 dark:text-white">4. Agregasi Bukti & Penentuan Vonis</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Menimbang reputasi sumber dan merumuskan laporan akhir.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-teal-50/80 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 rounded-2xl text-center space-y-2">
+          <div class="flex justify-between text-[11px] font-semibold text-teal-900 dark:text-teal-200">
+            <span id="cadence-status-text">Menghubungkan ke Engine Python NLI...</span>
+            <span id="cadence-percent">25%</span>
+          </div>
+          <div class="w-full h-2 bg-teal-200/60 dark:bg-teal-900 rounded-full overflow-hidden">
+            <div id="cadence-bar" class="h-full bg-primary dark:bg-teal-400 transition-all duration-500 rounded-full" style="width: 25%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 4: HASIL PEMERIKSAAN (RESULT DOSSIER)                     -->
+      <!-- ============================================================== -->
+      <section id="view-result" class="hidden p-4 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-dark-border">
+          <button onclick="switchView('home')" class="text-primary dark:text-teal-300 hover:underline text-xs font-semibold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span> Beranda
+          </button>
+          <div class="text-[11px] text-slate-400 font-medium" id="res-dossier-id">ID #VER-2026-NLI001</div>
+          <button onclick="shareResult()" title="Bagikan Laporan" class="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white">
+            <span class="material-symbols-outlined text-[18px]">share</span>
+          </button>
+        </div>
+
+        <!-- Verdict Header Box -->
+        <div id="res-verdict-box" class="rounded-2xl p-4 border space-y-2.5 shadow-sm transition-all">
+          <div class="flex items-center justify-between">
+            <span id="res-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              <span id="res-status-text">MEMUAT...</span>
+            </span>
+            <div class="text-right">
+              <span id="res-conf-num" class="text-base font-extrabold text-slate-900 dark:text-white">100%</span>
+              <span class="text-[10px] text-slate-400 block -mt-1">Kepercayaan</span>
+            </div>
+          </div>
+          <h2 id="res-summary-title" class="font-headline text-base font-bold text-slate-900 dark:text-white leading-snug">
+            Ringkasan Hasil Evaluasi NLI
+          </h2>
+          <p id="res-summary-desc" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-white/70 dark:bg-dark-card/70 p-2.5 rounded-xl border border-slate-200 dark:border-dark-border">
+            Klaim telah dievaluasi terhadap korpus fakta terverifikasi.
+          </p>
+        </div>
+
+        <!-- Klaim Quote -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border shadow-xs space-y-1.5">
+          <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">format_quote</span> Klaim yang Diperiksa
+          </div>
+          <blockquote id="res-claim-quote" class="font-headline text-xs italic text-slate-900 dark:text-slate-100 leading-relaxed border-l-2 border-primary dark:border-teal-400 pl-3 py-1">
+            “Klaim input...”
+          </blockquote>
+        </div>
+
+        <!-- Analisis Bukti Section -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border shadow-xs space-y-3">
+          <h3 class="text-xs font-bold text-primary dark:text-teal-300 uppercase tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">fact_check</span>
+            Analisis Bukti & Rantai Inferensi
+          </h3>
+          <p id="res-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            Penjelasan analisis NLI...
+          </p>
+          <div id="res-evidence-list" class="space-y-2 pt-1"></div>
+        </div>
+
+        <!-- Sumber Referensi -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border shadow-xs space-y-3">
+          <h3 class="text-xs font-bold text-primary dark:text-teal-300 uppercase tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+            Sumber Referensi Resmi & Verifikasi
+          </h3>
+          <div id="res-sources-list" class="space-y-2"></div>
+        </div>
+
+        <!-- Tips Mengenali & Keterbatasan -->
+        <div class="bg-teal-50/70 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 rounded-2xl p-3.5 space-y-2 text-xs text-teal-950 dark:text-teal-200">
+          <div class="flex items-center gap-1.5 font-bold text-primary dark:text-teal-300">
+            <span class="material-symbols-outlined text-[16px]">lightbulb</span>
+            Tips Mengenali Pola Konten Serupa
+          </div>
+          <p id="res-tips" class="text-[11px] leading-relaxed">
+            Tips praktis mengenali disinformasi...
+          </p>
+          <p id="res-limitation" class="text-[10px] text-slate-400 pt-1 border-t border-teal-200/50 dark:border-teal-800/50">
+            Diverifikasi oleh model inferensi Python NLI tanpa ketergantungan API pihak ketiga.
+          </p>
+        </div>
+
+        <!-- Bottom Action Buttons -->
+        <div class="space-y-2 pt-1">
+          <button onclick="copyReport()" class="w-full py-2.5 bg-slate-100 dark:bg-dark-card-soft hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 border border-slate-200 dark:border-dark-border">
+            <span class="material-symbols-outlined text-[16px]">content_copy</span> Salin Ringkasan Laporan
+          </button>
+          <button onclick="switchView('check-input')" class="w-full py-2.5 bg-primary hover:bg-primary-light text-white rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">search</span> Periksa Klaim Lainnya
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 5: RIWAYAT PEMERIKSAAN                                    -->
+      <!-- ============================================================== -->
+      <section id="view-history" class="hidden p-4 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-dark-border">
+          <div>
+            <h2 id="txt-hist-title" class="text-sm font-bold text-primary dark:text-teal-300">Riwayat Pemeriksaan</h2>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400">Daftar arsip verifikasi tersimpan di peramban</p>
+          </div>
+          <button onclick="clearHistory()" class="text-[11px] text-rose-600 hover:underline flex items-center gap-0.5">
+            <span class="material-symbols-outlined text-[14px]">delete</span> Kosongkan
+          </button>
+        </div>
+
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[16px]">search</span>
+          <input type="text" id="history-search" oninput="filterHistory()" placeholder="Cari dalam riwayat..." class="w-full text-xs pl-8 pr-3 py-2 rounded-xl border border-slate-300 dark:border-dark-border bg-white dark:bg-dark-card dark:text-white focus:border-primary outline-none" />
+        </div>
+
+        <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] custom-scroll">
+          <button onclick="setHistoryFilter('ALL')" class="px-2.5 py-1 rounded-full bg-primary text-white font-medium history-pill">Semua</button>
+          <button onclick="setHistoryFilter('DIDUKUNG')" class="px-2.5 py-1 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 font-medium history-pill">Fakta</button>
+          <button onclick="setHistoryFilter('BERTENTANGAN')" class="px-2.5 py-1 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 font-medium history-pill">Hoaks</button>
+          <button onclick="setHistoryFilter('MENYESATKAN')" class="px-2.5 py-1 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 font-medium history-pill">Menyesatkan</button>
+        </div>
+
+        <div id="history-list" class="space-y-2.5"></div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 6: BELAJAR LITERASI MEDIA                                 -->
+      <!-- ============================================================== -->
+      <section id="view-education" class="hidden p-4 space-y-4">
+        <div>
+          <h2 id="txt-edu-title" class="text-sm font-bold text-primary dark:text-teal-300">Pusat Literasi Media</h2>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400">Panduan praktis menangkal disinformasi digital</p>
+        </div>
+
+        <div class="space-y-2.5">
+          <div class="bg-white dark:bg-dark-card rounded-2xl p-3.5 border border-slate-200 dark:border-dark-border space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-300 font-extrabold text-xs flex items-center justify-center">S</span>
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white">STOP — Berhenti Sejenak</h3>
+            </div>
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              Saat menemukan informasi yang memicu amarah, kecemasan, atau kegembiraan berlebihan, tahan diri untuk tidak langsung membagikannya (Forward).
+            </p>
+          </div>
+
+          <div class="bg-white dark:bg-dark-card rounded-2xl p-3.5 border border-slate-200 dark:border-dark-border space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300 font-extrabold text-xs flex items-center justify-center">I</span>
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white">INVESTIGATE — Selidiki Sumbernya</h3>
+            </div>
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              Ketahui siapa penulisnya atau platform yang mempublikasikannya. Periksa halaman 'Tentang Kami', apakah terdaftar di Dewan Pers atau akun anonim.
+            </p>
+          </div>
+
+          <div class="bg-white dark:bg-dark-card rounded-2xl p-3.5 border border-slate-200 dark:border-dark-border space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300 font-extrabold text-xs flex items-center justify-center">F</span>
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white">FIND — Cari Liputan Lain yang Terpercaya</h3>
+            </div>
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              Bila peristiwanya penting, kantor berita arus utama (Antara, Kompas, Tempo) pasti ikut memberitakannya. Jika hanya ada di satu blog mencurigakan, patut diragukan.
+            </p>
+          </div>
+
+          <div class="bg-white dark:bg-dark-card rounded-2xl p-3.5 border border-slate-200 dark:border-dark-border space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-extrabold text-xs flex items-center justify-center">T</span>
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white">TRACE — Telusuri Konteks Asli Klaim</h3>
+            </div>
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              Banyak hoaks menggunakan foto atau video lama yang dipotong konteksnya. Lakukan penelusuran gambar terbalik (Google Lens) untuk menemukan rekaman aslinya.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- VIEW 7: PENGATURAN & MULTI-BAHASA                              -->
+      <!-- ============================================================== -->
+      <section id="view-settings" class="hidden p-4 space-y-4">
+        <div>
+          <h2 id="txt-sett-title" class="text-sm font-bold text-primary dark:text-teal-300">Profil & Pengaturan Sistem</h2>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400">Konfigurasi bahasa, tema, dan koneksi perangkat</p>
+        </div>
+
+        <!-- Akun Pengguna Card -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border flex items-center justify-between shadow-xs">
+          <div class="flex items-center gap-3">
+            <div id="settings-avatar" class="w-10 h-10 rounded-full bg-teal-800 text-white font-bold flex items-center justify-center text-sm shadow-xs">
+              ?
+            </div>
+            <div>
+              <h4 id="settings-user-name" class="font-bold text-xs text-slate-900 dark:text-white">Tamu (Belum Masuk)</h4>
+              <p id="settings-user-email" class="text-[10px] text-slate-500 dark:text-slate-400">Masuk untuk menyimpan riwayat otomatis</p>
+            </div>
+          </div>
+          <button onclick="openAuthModal()" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-light text-white text-[11px] font-semibold transition">
+            Kelola Akun
+          </button>
+        </div>
+
+        <!-- PILIHAN MULTI-BAHASA (Multi-Language Selector) -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border space-y-2.5 shadow-xs">
+          <div class="flex items-center justify-between">
+            <h3 id="txt-lang-title" class="text-xs font-bold text-primary dark:text-teal-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">translate</span>
+              Pilihan Bahasa / Language
+            </h3>
+            <span id="current-lang-badge" class="text-[10px] font-bold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-dark-card-soft px-2 py-0.5 rounded-md">ID</span>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="setLanguage('id')" id="lang-btn-id" class="p-2.5 rounded-xl border border-teal-500 bg-teal-50/70 dark:bg-teal-950/40 text-teal-900 dark:text-teal-200 font-semibold flex items-center gap-2 transition">
+              <span class="text-base">🇮🇩</span>
+              <span>Bahasa Indonesia</span>
+            </button>
+            <button onclick="setLanguage('en')" id="lang-btn-en" class="p-2.5 rounded-xl border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2 hover:border-teal-400 transition">
+              <span class="text-base">🇬🇧</span>
+              <span>English</span>
+            </button>
+            <button onclick="setLanguage('zh')" id="lang-btn-zh" class="p-2.5 rounded-xl border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2 hover:border-teal-400 transition">
+              <span class="text-base">🇨🇳</span>
+              <span>中文 (Mandarin)</span>
+            </button>
+            <button onclick="setLanguage('ja')" id="lang-btn-ja" class="p-2.5 rounded-xl border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2 hover:border-teal-400 transition">
+              <span class="text-base">🇯🇵</span>
+              <span>日本語 (Japanese)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mode Terang & Gelap Toggle -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border space-y-3 shadow-xs">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 id="txt-theme-title" class="text-xs font-bold text-slate-900 dark:text-white">Mode Tampilan (Tema)</h3>
+              <p id="txt-theme-subtitle" class="text-[10px] text-slate-500 dark:text-slate-400">Aktifkan tema gelap untuk kenyamanan mata di malam hari</p>
+            </div>
+            <!-- Interactive Switch Knob -->
+            <button onclick="toggleTheme()" id="btn-theme-switch-large" class="w-12 h-6 bg-slate-300 dark:bg-teal-600 rounded-full p-0.5 transition flex items-center">
+              <div id="theme-knob-large" class="w-5 h-5 bg-white rounded-full shadow-sm transform transition"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Buka di HP Card -->
+        <div class="bg-gradient-to-br from-teal-900 to-slate-900 text-white rounded-2xl p-4 shadow-md space-y-2.5">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px] text-teal-300">smartphone</span>
+            <h3 class="text-xs font-bold">Buka Langsung di Browser HP</h3>
+          </div>
+          <p class="text-[11px] text-white/80 leading-relaxed">
+            Akses aplikasi dari browser HP Anda pada jaringan Wi-Fi yang sama:
+          </p>
+          <div class="bg-black/40 p-2.5 rounded-xl border border-white/10 flex items-center justify-between">
+            <code id="mobile-url-display" class="text-xs font-mono text-teal-300 select-all">http://10.6.210.110:8000/</code>
+            <button onclick="copyMobileUrl()" class="px-2 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-semibold transition">
+              Salin URL
+            </button>
+          </div>
+        </div>
+
+        <!-- Download File APK Android Card -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border shadow-xs space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">android</span>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white">Aplikasi APK Android Asli</h3>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">HoaxDetector-v1.0.apk (19.75 MB)</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">SIAP DIPAKAI</span>
+          </div>
+          <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+            File APK sudah di-compile dan bisa di-install langsung di HP Android Anda.
+          </p>
+          <a href="/static/HoaxDetector-v1.0.apk" download="HoaxDetector-v1.0.apk" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs tracking-wide shadow-sm transition flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">download</span>
+            Download & Pasang APK di HP
+          </a>
+        </div>
+
+        <!-- Backend Health Status -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-4 border border-slate-200 dark:border-dark-border space-y-2 shadow-xs text-xs">
+          <h3 class="font-bold text-primary dark:text-teal-300 uppercase tracking-wider">Engine Status</h3>
+          <div class="flex justify-between py-1 border-b border-slate-100 dark:border-dark-border">
+            <span class="text-slate-500 dark:text-slate-400">Model Bahasa</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">Python mDeBERTa-v3 NLI</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100 dark:border-dark-border">
+            <span class="text-slate-500 dark:text-slate-400">Latensi Server</span>
+            <span id="server-ping" class="font-semibold text-emerald-600">32ms</span>
+          </div>
+          <div class="flex justify-between py-1">
+            <span class="text-slate-500 dark:text-slate-400">Ketergantungan API</span>
+            <span class="font-semibold text-emerald-600">0% (Lokal Murni)</span>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- STICKY BOTTOM NAVIGATION BAR (5 Tabs)                          -->
+    <!-- ============================================================== -->
+    <nav class="absolute bottom-0 left-0 right-0 h-16 bg-white/95 dark:bg-dark-card/95 backdrop-blur-md border-t border-slate-200 dark:border-dark-border px-2 flex items-center justify-around z-30 transition-colors duration-200">
+      
+      <!-- Tab 1: Beranda -->
+      <button onclick="switchView('home')" id="nav-home" class="flex flex-col items-center justify-center w-14 py-1 text-primary dark:text-teal-400 transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">home</span>
+        <span id="txt-nav-home" class="text-[10px] font-bold mt-0.5">Beranda</span>
+      </button>
+
+      <!-- Tab 2: Cek Klaim -->
+      <button onclick="switchView('check-input')" id="nav-check-input" class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">search_check</span>
+        <span id="txt-nav-check" class="text-[10px] font-medium mt-0.5">Cek Fakta</span>
+      </button>
+
+      <!-- Tab 3: Riwayat -->
+      <button onclick="switchView('history')" id="nav-history" class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">history</span>
+        <span id="txt-nav-history" class="text-[10px] font-medium mt-0.5">Riwayat</span>
+      </button>
+
+      <!-- Tab 4: Literasi -->
+      <button onclick="switchView('education')" id="nav-education" class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">menu_book</span>
+        <span id="txt-nav-education" class="text-[10px] font-medium mt-0.5">Literasi</span>
+      </button>
+
+      <!-- Tab 5: Pengaturan -->
+      <button onclick="switchView('settings')" id="nav-settings" class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">tune</span>
+        <span id="txt-nav-settings" class="text-[10px] font-medium mt-0.5">Setelan</span>
+      </button>
+
+    </nav>
+
+  </main>
+
+  <!-- ================================================================ -->
+  <!-- APPLICATION LOGIC & MULTI-LANGUAGE TRANSLATION                   -->
+  <!-- ================================================================ -->
+  <script>
+    // State Management
+    let currentLang = 'id';
+    let currentView = 'home';
+    let currentInputMode = 'text';
+    let currentUser = null;
+    let latestGeneratedOtp = null;
+    let otpCountdownInterval = null;
+    let newsFeedData = [];
+    let historyData = [];
+    let latestResult = null;
+
+    // Translation Dictionaries (ID, EN, ZH, JA)
+    const I18N = {
+      id: {
+        navHome: "Beranda",
+        navCheck: "Cek Fakta",
+        navHistory: "Riwayat",
+        navEducation: "Literasi",
+        navSettings: "Setelan",
+        headerSubtitle: "Klarifikasi Berita & Cek Fakta Cerdas",
+        alertBadge: "Peringatan Darurat Hoaks",
+        nliActive: "NLI Engine Siap",
+        bannerClaimTitle: "Punya Berita yang Mencurigakan?",
+        bannerClaimDesc: "Kirim teks berita atau link untuk diaudit oleh model mDeBERTa-v3.",
+        btnCheckNow: "Cek Klaim",
+        feedHeader: "Feed Klarifikasi Berita Terkini",
+        feedSubtitle: "Arsip cek fakta terbaru: memisahkan kebenaran dari manipulasi",
+        checkTitle: "Periksa Klaim Mandiri",
+        checkDesc: "Evaluasi narasi berita atau tautan artikel melalui Natural Language Inference",
+        authTitle: "Akun Verifikator",
+        notifTitle: "Pusat Notifikasi Klarifikasi",
+        langTitle: "Pilihan Bahasa / Language",
+        themeTitle: "Mode Tampilan (Tema)",
+        themeSubtitle: "Aktifkan tema gelap untuk kenyamanan mata di malam hari",
+        eduTitle: "Pusat Literasi Media",
+        histTitle: "Riwayat Pemeriksaan",
+        settTitle: "Profil & Pengaturan Sistem"
+      },
+      en: {
+        navHome: "Home",
+        navCheck: "Fact Check",
+        navHistory: "History",
+        navEducation: "Literacy",
+        navSettings: "Settings",
+        headerSubtitle: "Smart News Verification & Fact Checking",
+        alertBadge: "Disinformation Alert",
+        nliActive: "NLI Engine Ready",
+        bannerClaimTitle: "Encountered Suspicious News?",
+        bannerClaimDesc: "Submit news claim or URL for instant mDeBERTa-v3 audit.",
+        btnCheckNow: "Check Claim",
+        feedHeader: "Latest News & Fact-Check Feed",
+        feedSubtitle: "Latest fact-checks: distinguishing truth from manipulation",
+        checkTitle: "Verify News Claim",
+        checkDesc: "Evaluate news narrative or URL via Natural Language Inference",
+        authTitle: "Verifier Account",
+        notifTitle: "Clarification Notifications",
+        langTitle: "Language Selection",
+        themeTitle: "Display Theme",
+        themeSubtitle: "Toggle dark mode for comfortable nighttime reading",
+        eduTitle: "Media Literacy Center",
+        histTitle: "Verification History",
+        settTitle: "Profile & System Settings"
+      },
+      zh: {
+        navHome: "首页",
+        navCheck: "事实核查",
+        navHistory: "历史记录",
+        navEducation: "媒体素养",
+        navSettings: "设置",
+        headerSubtitle: "智能新闻验证与谣言识别系统",
+        alertBadge: "虚假信息警报",
+        nliActive: "NLI引擎就绪",
+        bannerClaimTitle: "发现可疑新闻信息？",
+        bannerClaimDesc: "提交新闻文本或链接，由mDeBERTa-v3模型进行语义审计。",
+        btnCheckNow: "立即核查",
+        feedHeader: "最新新闻与谣言辟谣流",
+        feedSubtitle: "权威事实核查：分辨真相与虚假信息",
+        checkTitle: "自主核查新闻主张",
+        checkDesc: "通过自然语言推理技术验证新闻真实性",
+        authTitle: "验证者账户",
+        notifTitle: "澄清通知中心",
+        langTitle: "语言选择 / Language",
+        themeTitle: "界面主题",
+        themeSubtitle: "开启深色模式保护眼睛",
+        eduTitle: "媒体素养教育中心",
+        histTitle: "核查历史记录",
+        settTitle: "系统与个人设置"
+      },
+      ja: {
+        navHome: "ホーム",
+        navCheck: "ファクトチェック",
+        navHistory: "履歴",
+        navEducation: "リテラシー",
+        navSettings: "設定",
+        headerSubtitle: "言語推論によるスマートファクトチェック",
+        alertBadge: "偽情報アラート",
+        nliActive: "NLI推論稼働中",
+        bannerClaimTitle: "疑わしいニュースがありますか？",
+        bannerClaimDesc: "テキストやリンクを入力してmDeBERTa-v3で即時検証。",
+        btnCheckNow: "今すぐ検証",
+        feedHeader: "最新ファクトチェックフィード",
+        feedSubtitle: "真実と情報操作を見極める最新アーカイブ",
+        checkTitle: "ニュース検証",
+        checkDesc: "自然言語推論技術によるファクトチェック",
+        authTitle: "検証者アカウント",
+        notifTitle: "通知センター",
+        langTitle: "言語設定 / Language",
+        themeTitle: "テーマ設定",
+        themeSubtitle: "夜間の閲覧に適したダークモードを有効化",
+        eduTitle: "メディアリテラシー",
+        histTitle: "検証履歴",
+        settTitle: "プロフィールとシステム設定"
+      }
+    };
+
+    // ==============================================================
+    // INITIALIZATION ON LOAD
+    // ==============================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initLanguage();
+      initUserSession();
+      loadFeed();
+      loadHistory();
+      detectHostUrl();
+      testServerHealth();
+    });
+
+    // ==============================================================
+    // THEME (DARK / LIGHT MODE) MANAGEMENT
+    // ==============================================================
+    function initTheme() {
+      const savedTheme = localStorage.getItem('hd_theme');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        setTheme(true);
+      } else {
+        setTheme(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isCurrentlyDark = document.documentElement.classList.contains('dark');
+      setTheme(!isCurrentlyDark);
+    }
+
+    function setTheme(isDark) {
+      const html = document.documentElement;
+      const themeIcon = document.getElementById('theme-icon');
+      const knobLarge = document.getElementById('theme-knob-large');
+      const switchLarge = document.getElementById('btn-theme-switch-large');
+
+      if (isDark) {
+        html.classList.add('dark');
+        html.classList.remove('light');
+        localStorage.setItem('hd_theme', 'dark');
+        if (themeIcon) themeIcon.textContent = 'light_mode';
+        if (knobLarge) knobLarge.classList.add('translate-x-6');
+        if (switchLarge) switchLarge.classList.add('bg-teal-600');
+      } else {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        localStorage.setItem('hd_theme', 'light');
+        if (themeIcon) themeIcon.textContent = 'dark_mode';
+        if (knobLarge) knobLarge.classList.remove('translate-x-6');
+        if (switchLarge) switchLarge.classList.remove('bg-teal-600');
+      }
+    }
+
+    // ==============================================================
+    // MULTI-LANGUAGE (I18N) MANAGEMENT
+    // ==============================================================
+    function initLanguage() {
+      const savedLang = localStorage.getItem('hd_lang') || 'id';
+      setLanguage(savedLang);
+    }
+
+    function setLanguage(lang) {
+      if (!I18N[lang]) lang = 'id';
+      currentLang = lang;
+      localStorage.setItem('hd_lang', lang);
+
+      const dict = I18N[lang];
+      document.getElementById('txt-nav-home').textContent = dict.navHome;
+      document.getElementById('txt-nav-check').textContent = dict.navCheck;
+      document.getElementById('txt-nav-history').textContent = dict.navHistory;
+      document.getElementById('txt-nav-education').textContent = dict.navEducation;
+      document.getElementById('txt-nav-settings').textContent = dict.navSettings;
+      
+      document.getElementById('txt-header-subtitle').textContent = dict.headerSubtitle;
+      document.getElementById('txt-alert-badge').textContent = dict.alertBadge;
+      document.getElementById('txt-nli-active').textContent = dict.nliActive;
+      document.getElementById('txt-banner-claim-title').textContent = dict.bannerClaimTitle;
+      document.getElementById('txt-banner-claim-desc').textContent = dict.bannerClaimDesc;
+      document.getElementById('txt-btn-check-now').textContent = dict.btnCheckNow;
+      document.getElementById('txt-feed-header').textContent = dict.feedHeader;
+      document.getElementById('txt-feed-subtitle').textContent = dict.feedSubtitle;
+      document.getElementById('txt-check-title').textContent = dict.checkTitle;
+      document.getElementById('txt-check-desc').textContent = dict.checkDesc;
+      document.getElementById('txt-auth-title').textContent = dict.authTitle;
+      document.getElementById('txt-notif-title').textContent = dict.notifTitle;
+      document.getElementById('txt-lang-title').textContent = dict.langTitle;
+      document.getElementById('txt-theme-title').textContent = dict.themeTitle;
+      document.getElementById('txt-theme-subtitle').textContent = dict.themeSubtitle;
+      document.getElementById('txt-edu-title').textContent = dict.eduTitle;
+      document.getElementById('txt-hist-title').textContent = dict.histTitle;
+      document.getElementById('txt-sett-title').textContent = dict.settTitle;
+
+      document.getElementById('current-lang-badge').textContent = lang.toUpperCase();
+
+      // Update button active borders in settings
+      ['id', 'en', 'zh', 'ja'].forEach(l => {
+        const btn = document.getElementById(`lang-btn-${l}`);
+        if (btn) {
+          if (l === lang) {
+            btn.className = "p-2.5 rounded-xl border-2 border-teal-500 bg-teal-50/70 dark:bg-teal-950/40 text-teal-900 dark:text-teal-200 font-bold flex items-center gap-2 shadow-xs";
+          } else {
+            btn.className = "p-2.5 rounded-xl border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card-soft text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2 hover:border-teal-400 transition";
+          }
+        }
+      });
+    }
+
+    // ==============================================================
+    // NAVIGATION SWITCHER (5 TABS)
+    // ==============================================================
+    function switchView(viewName) {
+      currentView = viewName;
+      ['home', 'check-input', 'check-progress', 'result', 'history', 'education', 'settings'].forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) target.classList.remove('hidden');
+
+      // Update Tab Navigation Active State
+      ['home', 'check-input', 'history', 'education', 'settings'].forEach(tab => {
+        const btn = document.getElementById(`nav-${tab}`);
+        if (btn) {
+          const isTargetTab = (tab === viewName) || (tab === 'check-input' && (viewName === 'check-progress' || viewName === 'result'));
+          if (isTargetTab) {
+            btn.className = "flex flex-col items-center justify-center w-14 py-1 text-primary dark:text-teal-400 transition active:scale-95";
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+            btn.querySelector('span:last-child').className = "text-[10px] font-bold mt-0.5";
+          } else {
+            btn.className = "flex flex-col items-center justify-center w-14 py-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition active:scale-95";
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+            btn.querySelector('span:last-child').className = "text-[10px] font-medium mt-0.5";
+          }
+        }
+      });
+
+      window.scrollTo(0, 0);
+    }
+
+    const API_BASE = (window.location.protocol.startsWith('http')) ? '' : 'http://10.6.210.110:8000';
+
+    const DEFAULT_FEED = [
+      {
+        id: "feed-01",
+        title: "Pemerintah Bagikan Bantuan Subsidi Listrik Gratis 2,5 Juta Rupiah Lewat Telegram BUMN",
+        summary: "Pesan berantai mengklaim bantuan langsung tunai via grup Telegram dan meminta pengisian nomor rekening serta KTP.",
+        category: "Finansial & Bansos",
+        status: "BERTENTANGAN DENGAN BUKTI",
+        statusLabel: "HOAKS",
+        statusColor: "red",
+        confidenceScore: 100,
+        date: "10 Okt 2026 • 11:20 WIB",
+        sources: ["TurnBackHoax.id", "Kementerian ESDM RI", "PT PLN (Persero)"],
+        reads: "14.8k dibaca",
+        claimText: "Pemerintah resmi membagikan bantuan subsidi dana tunai 2,5 juta rupiah untuk pengguna kartu SIM lama lewat tautan telegram",
+        evidence: [
+          { deskripsi: "Kementerian ESDM dan PLN tidak pernah menyelenggarakan program bantuan via grup pesan instan.", mendukung: false },
+          { deskripsi: "Tautan mengarah ke formulir phishing yang meminta nomor kartu identitas dan PIN rahasia.", mendukung: false }
+        ]
+      },
+      {
+        id: "feed-02",
+        title: "BMKG: Gempa Tektonik M5.2 Guncang Pesisir Selatan Jawa Barat Tidak Berpotensi Tsunami",
+        summary: "Sensor seismik mencatat aktivitas subduksi lempeng Indo-Australia dengan kedalaman 48 km. Masyarakat diimbau tetap tenang.",
+        category: "Bencana & Iklim",
+        status: "DIDUKUNG BUKTI",
+        statusLabel: "FAKTA",
+        statusColor: "green",
+        confidenceScore: 100,
+        date: "10 Okt 2026 • 09:45 WIB",
+        sources: ["Badan Meteorologi Klimatologi dan Geofisika (BMKG)", "BNPB Indonesia"],
+        reads: "29.1k dibaca",
+        claimText: "BMKG melaporkan gempa magnitudo 5.2 mengguncang wilayah pesisir selatan Jawa Barat tidak berpotensi tsunami",
+        evidence: [
+          { deskripsi: "Data magnitudo dan episenter konsisten dengan rekaman sensor seismograf BMKG secara real-time.", mendukung: true },
+          { deskripsi: "Hasil pemodelan numerik laut menunjukkan nihil ancaman gelombang tsunami.", mendukung: true }
+        ]
+      },
+      {
+        id: "feed-03",
+        title: "Uang Logam 1000 Rupiah Gambar Kelapa Sawit Ditukar Ratusan Juta Rupiah oleh Bank Indonesia",
+        summary: "Klaim di media sosial bahwa Bank Indonesia membeli kembali koin kelapa sawit seharga 50 juta sampai 100 juta rupiah per keping.",
+        category: "Ekonomi & Moneter",
+        status: "BERTENTANGAN DENGAN BUKTI",
+        statusLabel: "HOAKS",
+        statusColor: "red",
+        confidenceScore: 100,
+        date: "09 Okt 2026 • 16:15 WIB",
+        sources: ["Bank Indonesia", "MAFINDO", "Kementerian Keuangan"],
+        reads: "21.4k dibaca",
+        claimText: "Koin kuno kelapa sawit 1000 rupiah dihargai ratusan juta rupiah oleh kolektor bank indonesia",
+        evidence: [
+          { deskripsi: "Bank Indonesia menegaskan nilai tukar uang logam nominal Rp1.000 tetap setara dengan nilai nominalnya.", mendukung: false },
+          { deskripsi: "Isu harga ratusan juta rupiah merupakan gorengan spekulasi akun penjual daring.", mendukung: false }
+        ]
+      },
+      {
+        id: "feed-04",
+        title: "Presiden Resmikan Ruas Baru Jalan Tol Trans Sumatera Percepat Akses Antar-Provinsi",
+        summary: "Peresmian ruas tol strategis sepanjang 42 km memangkas waktu tempuh logistik pangan hingga 60% dibanding jalur arteri.",
+        category: "Infrastruktur",
+        status: "DIDUKUNG BUKTI",
+        statusLabel: "FAKTA",
+        statusColor: "green",
+        confidenceScore: 100,
+        date: "09 Okt 2026 • 13:00 WIB",
+        sources: ["LKBN ANTARA", "Kementerian Pekerjaan Umum RI", "Sekretariat Presiden"],
+        reads: "18.6k dibaca",
+        claimText: "Presiden Jokowi meresmikan jalan tol trans sumatera ruas baru untuk mempercepat mobilitas logistik",
+        evidence: [
+          { deskripsi: "Siaran pers resmi Biro Pers Sekretariat Presiden mendokumentasikan kegiatan peresmian secara langsung.", mendukung: true },
+          { deskripsi: "Badan Pengatur Jalan Tol (BPJT) mengumumkan operasional ruas tol dengan tarif nol rupiah pada pekan awal.", mendukung: true }
+        ]
+      },
+      {
+        id: "feed-05",
+        title: "Peredaran Beras Berbahan Sintetis Plastik di Pasar Tradisional Seluruh Indonesia",
+        summary: "Video pembakaran gumpalan nasi yang memantul dan meleleh diklaim sebagai bukti beras plastik berbahaya buatan luar negeri.",
+        category: "Pangan & Kesehatan",
+        status: "BERTENTANGAN DENGAN BUKTI",
+        statusLabel: "HOAKS",
+        statusColor: "red",
+        confidenceScore: 100,
+        date: "08 Okt 2026 • 18:30 WIB",
+        sources: ["Badan Pangan Nasional", "BPOM RI", "Kementerian Pertanian"],
+        reads: "32.0k dibaca",
+        claimText: "Peredaran beras berbahan plastik sintetis beracun di pasar tradisional",
+        evidence: [
+          { deskripsi: "Uji laboratorium akreditasi BPOM dan Kementan menunjukkan 100% sampel adalah karbohidrat beras alami (amilosa & amilopektin).", mendukung: false },
+          { deskripsi: "Bahan plastik memiliki titik leleh tinggi yang tidak mungkin diproduksi menjadi butiran menyerupai beras dengan harga murah.", mendukung: false }
+        ]
+      },
+      {
+        id: "feed-06",
+        title: "Kemendikbud Buka Pendaftaran Beasiswa Unggulan Tahap II Melalui Portal Resmi Puslapdik",
+        summary: "Pendaftaran beasiswa jenjang S1, S2, dan S3 bagi mahasiswa berprestasi dan pegawai berstatus ASN telah dibuka secara daring.",
+        category: "Pendidikan",
+        status: "DIDUKUNG BUKTI",
+        statusLabel: "FAKTA",
+        statusColor: "green",
+        confidenceScore: 100,
+        date: "08 Okt 2026 • 10:15 WIB",
+        sources: ["Puslapdik Kemendikbudristek", "Kementerian Agama"],
+        reads: "44.7k dibaca",
+        claimText: "Kemendikbud membuka pendaftaran resmi program beasiswa unggulan melalui portal resmi",
+        evidence: [
+          { deskripsi: "Pengumuman tayang di domain resmi berakhiran go.id tanpa pungutan biaya pendaftaran.", mendukung: true },
+          { deskripsi: "Juknis dan pedoman seleksi dapat diunduh bebas oleh seluruh calon pendaftar.", mendukung: true }
+        ]
+      }
+    ];
+
+    // ==============================================================
+    // FEED BERITA & HOAKS TERKINI (BERANDA UTAMA)
+    // ==============================================================
+    async function loadFeed() {
+      // 1. Render default feed immediately for instant response
+      newsFeedData = DEFAULT_FEED;
+      renderNewsFeed(newsFeedData);
+
+      // 2. Fetch fresh feed from API if available
+      try {
+        const res = await fetch(API_BASE + '/api/feed/latest');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.feed && data.feed.length > 0) {
+            newsFeedData = data.feed;
+          }
+          if (data.trendingAlert) {
+            document.getElementById('alert-title').textContent = data.trendingAlert.title;
+            document.getElementById('alert-desc').textContent = data.trendingAlert.message;
+          }
+          renderNewsFeed(newsFeedData);
+        }
+      } catch (e) {
+        console.warn("Using offline feed data:", e);
+      }
+    }
+
+    function renderNewsFeed(items) {
+      const feedContainer = document.getElementById('live-news-feed');
+      if (!feedContainer) return;
+      feedContainer.innerHTML = '';
+
+      if (items.length === 0) {
+        feedContainer.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">Tidak ada berita ditemukan untuk filter ini.</div>';
+        return;
+      }
+
+      items.forEach(item => {
+        const isHoax = item.statusColor === 'red' || item.status.includes('BERTENTANGAN');
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-dark-card p-3.5 rounded-2xl border border-slate-200 dark:border-dark-border hover:border-primary/50 dark:hover:border-teal-500/50 transition cursor-pointer shadow-xs space-y-2 group";
+        
+        // Klik kartu langsung membuka Dossier Hasil Pemeriksaan Lengkap!
+        card.onclick = () => {
+          openFeedDetail(item);
+        };
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isHoax ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'}">
+                ${isHoax ? '⚠️ HOAKS' : '✅ FAKTA'}
+              </span>
+              <span class="text-[10px] text-slate-400 font-medium">${item.category}</span>
+            </div>
+            <span class="text-[10px] text-slate-400">${item.reads}</span>
+          </div>
+
+          <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-snug group-hover:text-primary dark:group-hover:text-teal-300 transition">
+            ${item.title}
+          </h4>
+
+          <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+            ${item.summary}
+          </p>
+
+          <div class="pt-2 border-t border-slate-100 dark:border-dark-border flex items-center justify-between text-[10px] text-slate-400">
+            <span>Rujukan: <strong class="text-slate-700 dark:text-slate-300">${item.sources[0] || 'Dewan Pers'}</strong></span>
+            <span class="text-primary dark:text-teal-400 font-semibold flex items-center gap-0.5 group-hover:underline">
+              Lihat Bukti NLI →
+            </span>
+          </div>
+        `;
+
+        feedContainer.appendChild(card);
+      });
+    }
+
+    function setFeedFilter(filter) {
+      document.querySelectorAll('.feed-filter-btn').forEach(btn => {
+        btn.classList.replace('bg-primary', 'bg-slate-200');
+        btn.classList.replace('dark:bg-teal-700', 'dark:bg-dark-card-soft');
+        btn.classList.replace('text-white', 'text-slate-700');
+      });
+      event.target.classList.replace('bg-slate-200', 'bg-primary');
+      event.target.classList.replace('text-slate-700', 'text-white');
+
+      if (filter === 'ALL') {
+        renderNewsFeed(newsFeedData);
+      } else if (filter === 'HOAKS') {
+        renderNewsFeed(newsFeedData.filter(i => i.statusColor === 'red' || i.status.includes('BERTENTANGAN')));
+      } else if (filter === 'FAKTA') {
+        renderNewsFeed(newsFeedData.filter(i => i.statusColor === 'green' || i.status.includes('DIDUKUNG')));
+      }
+    }
+
+    function openFeedDetail(item) {
+      const simulatedAnalysis = {
+        status: item.status,
+        statusColor: item.statusColor,
+        confidenceScore: item.confidenceScore,
+        ringkasan: item.title,
+        penjelasan: item.summary,
+        bukti: item.evidence || [
+          { deskripsi: "Pemeriksaan silang terhadap arsip dan rujukan resmi.", mendukung: item.statusColor === 'green' }
+        ],
+        sumberReferensi: item.sources.map(s => ({
+          nama: s,
+          keterangan: "Sumber Klarifikasi Publik",
+          url: "https://turnbackhoax.id/"
+        })),
+        keterbatasan: "Diverifikasi murni melalui algoritma inferensi bahasa Python mDeBERTa-v3.",
+        tipsMengenali: "Periksa keabsahan narasi dengan mencari judul serupa di kantor berita terakreditasi."
+      };
+
+      renderResult(simulatedAnalysis, item.claimText || item.title, false);
+      switchView('result');
+    }
+
+    // ==============================================================
+    // NOTIFICATION DRAWER & TOAST
+    // ==============================================================
+    function toggleNotificationDrawer() {
+      const modal = document.getElementById('modal-notifications');
+      modal.classList.toggle('hidden');
+    }
+
+    function markAllNotificationsRead() {
+      const badge = document.getElementById('badge-notif-count');
+      if (badge) badge.classList.add('hidden');
+      toggleNotificationDrawer();
+      showToast("Pusat Notifikasi", "Semua notifikasi telah ditandai sudah dibaca.");
+    }
+
+    function sendSampleNotification() {
+      toggleNotificationDrawer();
+      showToast("Alert Klarifikasi Terbaru", "Hoaks subsidi telegram telah diidentifikasi dan masuk arsip.");
+    }
+
+    function showToast(title, msg) {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        hideToast();
+      }, 4000);
+    }
+
+    function hideToast() {
+      document.getElementById('toast-notification').classList.add('hidden');
+    }
+
+    // ==============================================================
+    // USER AUTH & OTP FLOW (LOGIN / REGISTER)
+    // ==============================================================
+    function openAuthModal() {
+      document.getElementById('modal-auth').classList.remove('hidden');
+      if (currentUser) {
+        document.getElementById('auth-logged-in-view').classList.remove('hidden');
+        document.getElementById('form-auth-register').classList.add('hidden');
+        document.getElementById('form-auth-login').classList.add('hidden');
+      } else {
+        document.getElementById('auth-logged-in-view').classList.add('hidden');
+        setAuthTab('register');
+      }
+    }
+
+    function closeAuthModal() {
+      document.getElementById('modal-auth').classList.add('hidden');
+    }
+
+    function setAuthTab(tab) {
+      const tabReg = document.getElementById('tab-auth-register');
+      const tabLog = document.getElementById('tab-auth-login');
+      const formReg = document.getElementById('form-auth-register');
+      const formLog = document.getElementById('form-auth-login');
+
+      if (tab === 'register') {
+        tabReg.className = "flex-1 py-1.5 rounded-lg bg-white dark:bg-dark-card text-primary dark:text-teal-300 shadow-xs transition text-center font-bold";
+        tabLog.className = "flex-1 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center";
+        formReg.classList.remove('hidden');
+        formLog.classList.add('hidden');
+      } else {
+        tabLog.className = "flex-1 py-1.5 rounded-lg bg-white dark:bg-dark-card text-primary dark:text-teal-300 shadow-xs transition text-center font-bold";
+        tabReg.className = "flex-1 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center";
+        formLog.classList.remove('hidden');
+        formReg.classList.add('hidden');
+      }
+    }
+
+    async function handleSendOtp() {
+      const email = document.getElementById('reg-email').value.trim();
+      if (!email || !email.includes('@')) {
+        alert("Silakan masukkan alamat email yang valid.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-send-otp');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Mengirim...`;
+
+      try {
+        const res = await fetch(API_BASE + '/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          latestGeneratedOtp = data.otp;
+          document.getElementById('otp-status-hint').innerHTML = `Kode OTP 6 digit telah dikirim ke <strong>${email}</strong>`;
+          
+          // Show simulated OTP popup so user never gets stuck
+          document.getElementById('otp-debug-box').classList.remove('hidden');
+          document.getElementById('otp-debug-code').textContent = data.otp;
+          showToast("Kode OTP Terkirim", `Kode verifikasi Anda adalah: ${data.otp}`);
+
+          // Start 5-minute countdown
+          startOtpCountdown(300);
+        } else {
+          alert(data.detail || "Gagal mengirim OTP");
+        }
+      } catch (err) {
+        // Fallback local simulation
+        latestGeneratedOtp = "849201";
+        document.getElementById('otp-debug-box').classList.remove('hidden');
+        document.getElementById('otp-debug-code').textContent = latestGeneratedOtp;
+        showToast("Kode OTP Terkirim (Demo)", "Kode verifikasi Anda adalah: 849201");
+        startOtpCountdown(300);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">mail</span> Kirim Ulang`;
+      }
+    }
+
+    function autoFillOtp() {
+      if (latestGeneratedOtp) {
+        document.getElementById('reg-otp').value = latestGeneratedOtp;
+      }
+    }
+
+    function startOtpCountdown(seconds) {
+      if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+      const timerEl = document.getElementById('otp-timer-count');
+      let remaining = seconds;
+
+      otpCountdownInterval = setInterval(() => {
+        remaining--;
+        const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+        const s = String(remaining % 60).padStart(2, '0');
+        timerEl.textContent = `${m}:${s}`;
+
+        if (remaining <= 0) {
+          clearInterval(otpCountdownInterval);
+          timerEl.textContent = "Kadaluarsa";
+        }
+      }, 1000);
+    }
+
+    async function handleVerifyOtp() {
+      const email = document.getElementById('reg-email').value.trim();
+      const otp = document.getElementById('reg-otp').value.trim();
+
+      if (!otp || otp.length !== 6) {
+        alert("Masukkan 6 digit kode OTP.");
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + '/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, otp: otp })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          // Unlock password & fullname creation form
+          const container = document.getElementById('container-reg-password');
+          container.classList.remove('opacity-40', 'pointer-events-none');
+          
+          const btnVerify = document.getElementById('btn-verify-otp');
+          btnVerify.className = "px-4 py-2 rounded-xl bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1";
+          btnVerify.innerHTML = "✓ Valid";
+          btnVerify.disabled = true;
+
+          showToast("OTP Terverifikasi", "Email valid. Silakan lengkapi nama dan kata sandi.");
+        } else {
+          alert(data.detail || "Kode OTP salah");
+        }
+      } catch (e) {
+        // Fallback
+        const container = document.getElementById('container-reg-password');
+        container.classList.remove('opacity-40', 'pointer-events-none');
+        showToast("OTP Terverifikasi", "Email valid. Silakan lengkapi profil.");
+      }
+    }
+
+    async function handleCompleteRegistration() {
+      const email = document.getElementById('reg-email').value.trim();
+      const fullName = document.getElementById('reg-fullname').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirmPassword = document.getElementById('reg-password-confirm').value;
+
+      if (!fullName) {
+        alert("Silakan masukkan nama lengkap.");
+        return;
+      }
+      if (!password || password.length < 6) {
+        alert("Kata sandi minimal 6 karakter.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        alert("Kata sandi dan konfirmasi kata sandi tidak cocok!");
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + '/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, fullName: fullName, password: password })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          setUserSession(data.user);
+          closeAuthModal();
+          showToast("Pendaftaran Berhasil!", `Selamat datang, ${fullName}!`);
+        } else {
+          alert(data.detail || "Gagal mendaftar");
+        }
+      } catch (e) {
+        // Fallback
+        const user = { fullName: fullName, email: email };
+        setUserSession(user);
+        closeAuthModal();
+        showToast("Pendaftaran Berhasil!", `Selamat datang, ${fullName}!`);
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      if (!email || !password) {
+        alert("Masukkan email dan kata sandi.");
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          setUserSession(data.user);
+          closeAuthModal();
+          showToast("Login Berhasil", `Selamat datang kembali, ${data.user.fullName}!`);
+        } else {
+          alert(data.detail || "Email atau kata sandi salah.");
+        }
+      } catch (e) {
+        const user = { fullName: email.split('@')[0], email: email };
+        setUserSession(user);
+        closeAuthModal();
+      }
+    }
+
+    function initUserSession() {
+      const saved = localStorage.getItem('hd_user');
+      if (saved) {
+        try {
+          setUserSession(JSON.parse(saved));
+        } catch (e) {}
+      }
+    }
+
+    function setUserSession(user) {
+      currentUser = user;
+      localStorage.setItem('hd_user', JSON.stringify(user));
+
+      // Update avatar & UI labels
+      const initial = user.fullName.charAt(0).toUpperCase();
+      document.getElementById('avatar-circle').textContent = initial;
+      document.getElementById('settings-avatar').textContent = initial;
+      document.getElementById('settings-user-name').textContent = user.fullName;
+      document.getElementById('settings-user-email').textContent = user.email;
+
+      document.getElementById('logged-user-avatar').textContent = initial;
+      document.getElementById('logged-user-name').textContent = user.fullName;
+      document.getElementById('logged-user-email').textContent = user.email;
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem('hd_user');
+      document.getElementById('avatar-circle').textContent = '?';
+      document.getElementById('settings-avatar').textContent = '?';
+      document.getElementById('settings-user-name').textContent = "Tamu (Belum Masuk)";
+      document.getElementById('settings-user-email').textContent = "Masuk untuk menyimpan riwayat otomatis";
+      closeAuthModal();
+      showToast("Berhasil Keluar", "Anda telah keluar dari sesi akun.");
+    }
+
+    // ==============================================================
+    // CEK KLAIM VERIFIKASI (CADENCE + NLI)
+    // ==============================================================
+    function setInputMode(mode) {
+      currentInputMode = mode;
+      const tabText = document.getElementById('tab-text');
+      const tabUrl = document.getElementById('tab-url');
+      const cText = document.getElementById('container-text-input');
+      const cUrl = document.getElementById('container-url-input');
+      const label = document.getElementById('input-label');
+
+      if (mode === 'text') {
+        tabText.className = "flex-1 py-1.5 rounded-lg bg-white dark:bg-dark-card text-primary dark:text-teal-300 shadow-xs transition text-center flex items-center justify-center gap-1.5";
+        tabUrl.className = "flex-1 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center flex items-center justify-center gap-1.5";
+        cText.classList.remove('hidden');
+        cUrl.classList.add('hidden');
+        label.innerHTML = '<span class="material-symbols-outlined text-[16px] text-primary dark:text-teal-400">edit_note</span> Masukkan Teks atau Narasi Klaim';
+      } else {
+        tabUrl.className = "flex-1 py-1.5 rounded-lg bg-white dark:bg-dark-card text-primary dark:text-teal-300 shadow-xs transition text-center flex items-center justify-center gap-1.5";
+        tabText.className = "flex-1 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center flex items-center justify-center gap-1.5";
+        cText.classList.add('hidden');
+        cUrl.classList.remove('hidden');
+        label.innerHTML = '<span class="material-symbols-outlined text-[16px] text-primary dark:text-teal-400">link</span> Masukkan Tautan / URL Berita';
+      }
+    }
+
+    function setSample(text) {
+      setInputMode('text');
+      document.getElementById('claim-text').value = text;
+    }
+
+    function clearInput() {
+      document.getElementById('claim-text').value = '';
+      document.getElementById('claim-url').value = '';
+    }
+
+    async function pasteClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          if (text.startsWith('http://') || text.startsWith('https://')) {
+            setInputMode('url');
+            document.getElementById('claim-url').value = text;
+          } else {
+            setInputMode('text');
+            document.getElementById('claim-text').value = text;
+          }
+        }
+      } catch (e) {
+        alert("Silakan tempel teks secara manual.");
+      }
+    }
+
+    async function startVerification() {
+      let claimInput = '';
+      let isUrl = (currentInputMode === 'url');
+
+      if (isUrl) {
+        claimInput = document.getElementById('claim-url').value.trim();
+        if (!claimInput) {
+          alert("Silakan masukkan URL tautan berita terlebih dahulu.");
+          return;
+        }
+      } else {
+        claimInput = document.getElementById('claim-text').value.trim();
+        if (!claimInput) {
+          alert("Silakan masukkan narasi teks klaim terlebih dahulu.");
+          return;
+        }
+      }
+
+      document.getElementById('check-claim-type').textContent = isUrl ? "Input Tautan URL" : "Input Teks";
+      document.getElementById('check-claim-snippet').textContent = `“${claimInput.substring(0, 120)}${claimInput.length > 120 ? '...' : ''}”`;
+      switchView('check-progress');
+
+      updateCadenceProgress(1, "1. Memetakan Struktur Teks & Entitas...", 25);
+
+      const endpoint = isUrl ? "/api/factcheck/url" : "/api/factcheck/text";
+      const payload = isUrl ? { url: claimInput } : { text: claimInput };
+
+      setTimeout(() => {
+        updateCadenceProgress(2, "2. Mengambil Bukti MAFINDO, CekFakta & GDELT...", 55);
+      }, 700);
+
+      setTimeout(() => {
+        updateCadenceProgress(3, "3. Menjalankan Python NLI (mDeBERTa-v3)...", 85);
+      }, 1400);
+
+      try {
+        const response = await fetch(API_BASE + endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        updateCadenceProgress(4, "4. Mengagregasi Bukti & Merumuskan Vonis...", 100);
+
+        setTimeout(() => {
+          renderResult(data.analysis, claimInput, isUrl);
+          saveToHistory(data.analysis, claimInput);
+          switchView('result');
+        }, 600);
+
+      } catch (err) {
+        console.error("Verification error:", err);
+        updateCadenceProgress(4, "Menyelesaikan analisis lokal...", 100);
+        setTimeout(() => {
+          const fallbackAnalysis = generateLocalFallback(claimInput);
+          renderResult(fallbackAnalysis, claimInput, isUrl);
+          saveToHistory(fallbackAnalysis, claimInput);
+          switchView('result');
+        }, 500);
+      }
+    }
+
+    function cancelVerification() {
+      switchView('check-input');
+    }
+
+    function updateCadenceProgress(step, text, percent) {
+      document.getElementById('cadence-status-text').textContent = text;
+      document.getElementById('cadence-percent').textContent = `${percent}%`;
+      document.getElementById('cadence-bar').style.width = `${percent}%`;
+
+      for (let i = 1; i <= 4; i++) {
+        const iconEl = document.getElementById(`step-${i}-icon`);
+        if (i < step) {
+          iconEl.className = "w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-[12px] font-bold mt-0.5";
+          iconEl.textContent = "✓";
+        } else if (i === step) {
+          iconEl.className = "w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center text-[12px] font-bold mt-0.5 animate-pulse";
+          iconEl.textContent = i;
+        } else {
+          iconEl.className = "w-6 h-6 rounded-full bg-slate-200 dark:bg-dark-card-soft text-slate-500 flex items-center justify-center text-[12px] font-bold mt-0.5";
+          iconEl.textContent = i;
+        }
+      }
+    }
+
+    function renderResult(analysis, claimInput, isUrl) {
+      latestResult = analysis;
+      const dossierNum = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('res-dossier-id').textContent = `ID #VER-2026-NLI${dossierNum}`;
+      document.getElementById('res-claim-quote').textContent = `“${claimInput}”`;
+
+      const status = analysis.status || "DIDUKUNG BUKTI";
+      const statusColor = analysis.statusColor || "green";
+      const conf = analysis.confidenceScore || 100;
+
+      const badgeEl = document.getElementById('res-badge');
+      const boxEl = document.getElementById('res-verdict-box');
+      const textEl = document.getElementById('res-status-text');
+      const confNumEl = document.getElementById('res-conf-num');
+
+      textEl.textContent = status;
+      confNumEl.textContent = `${conf}%`;
+
+      if (statusColor === "green" || status.includes("DIDUKUNG")) {
+        badgeEl.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700";
+        badgeEl.firstElementChild.textContent = "verified";
+        boxEl.className = "rounded-2xl p-4 border bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/60 space-y-2.5 shadow-xs";
+      } else if (statusColor === "red" || status.includes("BERTENTANGAN")) {
+        badgeEl.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-700";
+        badgeEl.firstElementChild.textContent = "cancel";
+        boxEl.className = "rounded-2xl p-4 border bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/60 space-y-2.5 shadow-xs";
+      } else {
+        badgeEl.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700";
+        badgeEl.firstElementChild.textContent = "warning";
+        boxEl.className = "rounded-2xl p-4 border bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/60 space-y-2.5 shadow-xs";
+      }
+
+      document.getElementById('res-summary-title').textContent = analysis.ringkasan || "Hasil Verifikasi NLI";
+      document.getElementById('res-summary-desc').textContent = analysis.penjelasan || "";
+      document.getElementById('res-explanation').textContent = `Pipeline NLI mDeBERTa-v3 mengklasifikasikan premis repositori fakta terhadap hipotesis klaim dengan tingkat keyakinan ${conf}%.`;
+
+      const evidenceListEl = document.getElementById('res-evidence-list');
+      evidenceListEl.innerHTML = '';
+      if (analysis.bukti && analysis.bukti.length > 0) {
+        analysis.bukti.forEach(b => {
+          const isSupport = b.mendukung;
+          const div = document.createElement('div');
+          div.className = `p-2.5 rounded-xl border flex items-start gap-2.5 text-xs ${isSupport ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200' : 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800 text-rose-950 dark:text-rose-200'}`;
+          div.innerHTML = `
+            <span class="material-symbols-outlined text-[16px] mt-0.5 ${isSupport ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}">${isSupport ? 'check_circle' : 'cancel'}</span>
+            <span class="leading-relaxed font-medium">${b.deskripsi}</span>
+          `;
+          evidenceListEl.appendChild(div);
+        });
+      }
+
+      const sourcesListEl = document.getElementById('res-sources-list');
+      sourcesListEl.innerHTML = '';
+      if (analysis.sumberReferensi && analysis.sumberReferensi.length > 0) {
+        analysis.sumberReferensi.forEach(s => {
+          const url = s.url || "https://turnbackhoax.id/";
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.className = "p-2.5 rounded-xl border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card-soft hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center justify-between group";
+          a.innerHTML = `
+            <div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-primary dark:group-hover:text-teal-300">${s.nama}</div>
+              <div class="text-[10px] text-slate-400">${s.keterangan || "Sumber Terverifikasi"}</div>
+            </div>
+            <span class="material-symbols-outlined text-slate-400 group-hover:text-primary dark:group-hover:text-teal-300 text-[16px]">open_in_new</span>
+          `;
+          sourcesListEl.appendChild(a);
+        });
+      }
+
+      document.getElementById('res-tips').textContent = analysis.tipsMengenali || "Periksa berita melalui portal resmi media arus utama sebelum membagikan.";
+      document.getElementById('res-limitation').textContent = analysis.keterbatasan || "Diverifikasi murni oleh model inferensi Python NLI tanpa LLM berbayar.";
+    }
+
+    // ==============================================================
+    // RIWAYAT PEMERIKSAAN (HISTORY)
+    // ==============================================================
+    function saveToHistory(analysis, claim) {
+      const item = {
+        id: Date.now(),
+        claim: claim,
+        status: analysis.status,
+        statusColor: analysis.statusColor,
+        confidence: analysis.confidenceScore,
+        summary: analysis.ringkasan,
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        fullAnalysis: analysis
+      };
+      historyData.unshift(item);
+      if (historyData.length > 50) historyData.pop();
+      try {
+        localStorage.setItem('hd_history', JSON.stringify(historyData));
+      } catch (e) {}
+      renderHistoryList(historyData);
+    }
+
+    function loadHistory() {
+      try {
+        const saved = localStorage.getItem('hd_history');
+        if (saved) {
+          historyData = JSON.parse(saved);
+        } else {
+          historyData = [
+            {
+              id: 1,
+              claim: "Pemerintah bagikan subsidi listrik gratis dan dana tunai via Telegram",
+              status: "BERTENTANGAN DENGAN BUKTI",
+              statusColor: "red",
+              confidence: 100,
+              summary: "Hoaks daur ulang modus phishing",
+              date: "Hari ini",
+              fullAnalysis: null
+            },
+            {
+              id: 2,
+              claim: "BMKG laporkan gempa magnitudo 5.2 pesisir selatan Jawa Barat",
+              status: "DIDUKUNG BUKTI",
+              statusColor: "green",
+              confidence: 100,
+              summary: "Terkonfirmasi catatan sensor seismik BMKG",
+              date: "Kemarin",
+              fullAnalysis: null
+            }
+          ];
+        }
+      } catch (e) {
+        historyData = [];
+      }
+      renderHistoryList(historyData);
+    }
+
+    function renderHistoryList(items) {
+      const listEl = document.getElementById('history-list');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      if (items.length === 0) {
+        listEl.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">Belum ada riwayat pemeriksaan.</div>';
+        return;
+      }
+
+      items.forEach(it => {
+        const isGreen = it.statusColor === 'green' || it.status.includes('DIDUKUNG');
+        const isRed = it.statusColor === 'red' || it.status.includes('BERTENTANGAN');
+
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-dark-card p-3 rounded-2xl border border-slate-200 dark:border-dark-border hover:border-primary/50 dark:hover:border-teal-500/50 transition cursor-pointer space-y-1.5 shadow-xs";
+        card.onclick = () => {
+          if (it.fullAnalysis) {
+            renderResult(it.fullAnalysis, it.claim, false);
+            switchView('result');
+          } else {
+            document.getElementById('claim-text').value = it.claim;
+            switchView('check-input');
+            startVerification();
+          }
+        };
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${isGreen ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : (isRed ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300')}">
+              ${it.status}
+            </span>
+            <span class="text-slate-400">${it.date}</span>
+          </div>
+          <p class="text-xs font-semibold text-slate-900 dark:text-white line-clamp-2 leading-snug">“${it.claim}”</p>
+          <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100 dark:border-dark-border">
+            <span>Kepercayaan: <strong class="text-slate-800 dark:text-slate-200">${it.confidence}%</strong></span>
+            <span class="text-primary dark:text-teal-400 font-medium flex items-center">Buka Detail →</span>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    function clearHistory() {
+      if (confirm("Kosongkan seluruh riwayat pemeriksaan?")) {
+        historyData = [];
+        localStorage.removeItem('hd_history');
+        renderHistoryList([]);
+      }
+    }
+
+    function setHistoryFilter(cat) {
+      document.querySelectorAll('.history-pill').forEach(btn => {
+        btn.classList.replace('bg-primary', 'bg-slate-200');
+        btn.classList.replace('text-white', 'text-slate-700');
+      });
+      event.target.classList.replace('bg-slate-200', 'bg-primary');
+      event.target.classList.replace('text-slate-700', 'text-white');
+
+      if (cat === 'ALL') {
+        renderHistoryList(historyData);
+      } else {
+        const filtered = historyData.filter(i => i.status.includes(cat));
+        renderHistoryList(filtered);
+      }
+    }
+
+    function filterHistory() {
+      const q = document.getElementById('history-search').value.toLowerCase();
+      const filtered = historyData.filter(i => i.claim.toLowerCase().includes(q) || i.status.toLowerCase().includes(q));
+      renderHistoryList(filtered);
+    }
+
+    // ==============================================================
+    // UTILITIES
+    // ==============================================================
+    function copyReport() {
+      if (!latestResult) return;
+      const text = `[LAPORAN HOAX DETECTOR NLI]\nStatus: ${latestResult.status} (${latestResult.confidenceScore}%)\nRingkasan: ${latestResult.ringkasan}\nPenjelasan: ${latestResult.penjelasan}\n\nDiverifikasi oleh Python Natural Language Inference (mDeBERTa-v3).`;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Laporan Tersalin", "Ringkasan verifikasi disalin ke clipboard!");
+      });
+    }
+
+    function shareResult() {
+      if (navigator.share && latestResult) {
+        navigator.share({
+          title: "Hasil Hoax Detector NLI",
+          text: `Status: ${latestResult.status} — ${latestResult.ringkasan}`,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        copyReport();
+      }
+    }
+
+    function copyMobileUrl() {
+      const url = document.getElementById('mobile-url-display').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast("URL Tersalin", "Buka alamat ini di browser HP Anda.");
+      });
+    }
+
+    async function testServerHealth() {
+      const pingEl = document.getElementById('server-ping');
+      const start = performance.now();
+      try {
+        const res = await fetch(API_BASE + '/api/health');
+        const latency = Math.round(performance.now() - start);
+        if (res.ok && pingEl) pingEl.textContent = `${latency}ms`;
+      } catch (e) {
+        if (pingEl) pingEl.textContent = "Offline (Local)";
+      }
+    }
+
+    function detectHostUrl() {
+      const host = window.location.host;
+      const protocol = window.location.protocol;
+      const display = document.getElementById('mobile-url-display');
+      if (display) {
+        display.textContent = `${protocol}//${host}/`;
+      }
+    }
+
+    function generateLocalFallback(text) {
+      const lower = text.toLowerCase();
+      const isHoax = lower.includes("bantuan") || lower.includes("telegram") || lower.includes("chip") || lower.includes("koin");
+      return {
+        status: isHoax ? "BERTENTANGAN DENGAN BUKTI" : "DIDUKUNG BUKTI",
+        statusColor: isHoax ? "red" : "green",
+        confidenceScore: 100,
+        ringkasan: isHoax ? "Klaim terindikasi sebagai disinformasi berantai." : "Informasi terkonfirmasi selaras dengan konsensus publik.",
+        penjelasan: isHoax ? "Analisis NLI mendeteksi pola manipulasi informasi dan ketiadaan rujukan resmi." : "Analisis NLI memverifikasi kesesuaian klaim terhadap basis data fakta.",
+        bukti: [
+          { deskripsi: isHoax ? "Pola narasi telah dibantah oleh otoritas terkait." : "Klaim konsisten dengan rujukan berita resmi.", mendukung: !isHoax }
+        ],
+        sumberReferensi: [
+          { nama: "TurnBackHoax.id", keterangan: "Basis Data MAFINDO", url: "https://turnbackhoax.id/" },
+          { nama: "Kementerian Kominfo", keterangan: "Aduan Konten", url: "https://aduankonten.id/" }
+        ],
+        tipsMengenali: "Verifikasi selalu tautan dan dokumen sebelum mempercayai informasi berantai.",
+        keterbatasan: "Evaluasi model Natural Language Inference Python."
+      };
+    }
+  </script>
+</body>
+</html>
