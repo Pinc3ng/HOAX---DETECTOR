@@ -774,7 +774,7 @@
             Akses aplikasi dari browser HP Anda pada jaringan Wi-Fi yang sama:
           </p>
           <div class="bg-black/40 p-2.5 rounded-xl border border-white/10 flex items-center justify-between">
-            <code id="mobile-url-display" class="text-xs font-mono text-teal-300 select-all">http://10.6.210.110:8000/</code>
+            <code id="mobile-url-display" class="text-xs font-mono text-teal-300 select-all">http://10.10.23.66:8000/</code>
             <button onclick="copyMobileUrl()" class="px-2 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-semibold transition">
               Salin URL
             </button>
@@ -1155,7 +1155,7 @@
       if (window.location.protocol.startsWith('http') && !window.location.href.includes('android_asset')) {
         return '';
       }
-      return 'http://10.6.210.110:8000';
+      return 'http://10.10.23.66:8000';
     }
 
     const API_BASE = getApiBase();
@@ -1767,12 +1767,17 @@
         updateCadenceProgress(3, "3. Menjalankan Python NLI (mDeBERTa-v3)...", 85);
       }, 1400);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
       try {
         const response = await fetch(API_BASE + endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -1783,17 +1788,18 @@
           renderResult(data.analysis, claimInput, isUrl);
           saveToHistory(data.analysis, claimInput);
           switchView('result');
-        }, 600);
+        }, 500);
 
       } catch (err) {
-        console.error("Verification error:", err);
-        updateCadenceProgress(4, "Menyelesaikan analisis lokal...", 100);
+        clearTimeout(timeoutId);
+        console.warn("Server backend tidak merespons atau timeout, beralih ke analisis cerdas mandiri:", err);
+        updateCadenceProgress(4, "4. Menyelesaikan analisis cerdas instan...", 100);
         setTimeout(() => {
           const fallbackAnalysis = generateLocalFallback(claimInput);
           renderResult(fallbackAnalysis, claimInput, isUrl);
           saveToHistory(fallbackAnalysis, claimInput);
           switchView('result');
-        }, 500);
+        }, 400);
       }
     }
 
@@ -2203,7 +2209,7 @@
 
       // 4. Rumor Kritis Tokoh Nasional
       const hasFigure = ["jokowi", "prabowo", "gibran", "megawati", "sby", "sri mulyani", "luhut", "menteri", "presiden"].some(k => lower.includes(k));
-      const hasFalseEvent = ["meninggal", "tewas", "wafat", "ditangkap kpk", "kabur ke luar negeri", "mengundurkan diri", "bunker uang", "bagi uang 500", "uang 500 juta"].some(k => lower.includes(k));
+      const hasFalseEvent = ["meninggal", "tewas", "wafat", "ditangkap kpk", "kabur ke luar negeri", "mengundurkan diri", "turun jabatan", "turun tahta", "dilengserkan", "kudeta", "bunker uang", "bagi uang 500", "uang 500 juta"].some(k => lower.includes(k));
 
       if (hasFigure && hasFalseEvent) {
         return {
