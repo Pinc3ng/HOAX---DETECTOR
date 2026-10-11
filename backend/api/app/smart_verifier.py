@@ -88,7 +88,7 @@ async def search_turnbackhoax(query_text: str, client: httpx.AsyncClient) -> Lis
     url = f"https://turnbackhoax.id/search?query={urllib.parse.quote(query)}"
     items = []
     try:
-        resp = await client.get(url, timeout=7.0)
+        resp = await client.get(url, timeout=3.5)
         if resp.status_code == 200:
             # Cari blok artikel berdasarkan tautan artikel
             article_urls = list(dict.fromkeys(re.findall(r'https://turnbackhoax\.id/articles/[a-zA-Z0-9_-]+', resp.text)))
@@ -274,7 +274,7 @@ async def analyze_claim_indonesia(claim_text: str) -> Dict[str, Any]:
 
     # 5. PENGAMBILAN BUKTI LIVE DARI MAFINDO & BERITA NASIONAL
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'}
-    async with httpx.AsyncClient(headers=headers, timeout=8.0, follow_redirects=True) as client:
+    async with httpx.AsyncClient(headers=headers, timeout=4.0, follow_redirects=True) as client:
         tbh_search_task = search_turnbackhoax(cleaned_claim, client)
         rss_task = fetch_rss_feeds(client)
         tbh_items, rss_items = await asyncio.gather(tbh_search_task, rss_task, return_exceptions=True)

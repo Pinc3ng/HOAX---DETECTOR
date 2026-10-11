@@ -1754,21 +1754,27 @@
       document.getElementById('check-claim-snippet').textContent = `“${claimInput.substring(0, 120)}${claimInput.length > 120 ? '...' : ''}”`;
       switchView('check-progress');
 
-      updateCadenceProgress(1, "1. Memetakan Struktur Teks & Entitas...", 25);
+      let currentPercent = 15;
+      updateCadenceProgress(1, "1. Memetakan Struktur Teks & Entitas...", currentPercent);
+
+      const progressInterval = setInterval(() => {
+        if (currentPercent < 45) {
+          currentPercent += 8;
+          updateCadenceProgress(2, "2. Mengambil Bukti MAFINDO, CekFakta & Antara...", currentPercent);
+        } else if (currentPercent < 80) {
+          currentPercent += 5;
+          updateCadenceProgress(3, "3. Menjalankan Python NLI (mDeBERTa-v3)...", currentPercent);
+        } else if (currentPercent < 95) {
+          currentPercent += 2;
+          updateCadenceProgress(4, "4. Mengagregasi Bukti & Skor Kepercayaan...", currentPercent);
+        }
+      }, 250);
 
       const endpoint = isUrl ? "/api/factcheck/url" : "/api/factcheck/text";
       const payload = isUrl ? { url: claimInput } : { text: claimInput };
 
-      setTimeout(() => {
-        updateCadenceProgress(2, "2. Mengambil Bukti MAFINDO, CekFakta & GDELT...", 55);
-      }, 700);
-
-      setTimeout(() => {
-        updateCadenceProgress(3, "3. Menjalankan Python NLI (mDeBERTa-v3)...", 85);
-      }, 1400);
-
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 4500);
 
       try {
         const response = await fetch(API_BASE + endpoint, {
@@ -1778,28 +1784,30 @@
           signal: controller.signal
         });
         clearTimeout(timeoutId);
+        clearInterval(progressInterval);
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
 
-        updateCadenceProgress(4, "4. Mengagregasi Bukti & Merumuskan Vonis...", 100);
+        updateCadenceProgress(4, "4. Analisis Selesai!", 100);
 
         setTimeout(() => {
           renderResult(data.analysis, claimInput, isUrl);
           saveToHistory(data.analysis, claimInput);
           switchView('result');
-        }, 500);
+        }, 300);
 
       } catch (err) {
         clearTimeout(timeoutId);
-        console.warn("Server backend tidak merespons atau timeout, beralih ke analisis cerdas mandiri:", err);
-        updateCadenceProgress(4, "4. Menyelesaikan analisis cerdas instan...", 100);
+        clearInterval(progressInterval);
+        console.warn("Backend timeout/unreachable, fallback to local:", err);
+        updateCadenceProgress(4, "4. Menyelesaikan Analisis Cerdas...", 100);
         setTimeout(() => {
           const fallbackAnalysis = generateLocalFallback(claimInput);
           renderResult(fallbackAnalysis, claimInput, isUrl);
           saveToHistory(fallbackAnalysis, claimInput);
           switchView('result');
-        }, 400);
+        }, 300);
       }
     }
 
